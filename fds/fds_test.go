@@ -2,9 +2,14 @@ package fds_test
 
 import (
 	"io/ioutil"
+	"log"
 	"os"
+	"runtime"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/stretchr/testify/suite"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/v2tool/galaxy-fds-sdk-go/fds"
@@ -23,28 +28,41 @@ var (
 )
 
 var (
-	testObjectName    = "testobjectname"
 	testObjectContent = "Hello world"
+	testObjectName    = "testobjectname"
 )
 
-func createTestBucket() {
-	exist, _ := client.DoesBucketExist(testBucket)
-	if exist {
-		client.DeleteBucket(testBucket)
-	}
+type GalaxyFDSTestSuite struct {
+	suite.Suite
 
-	createBucketRequest := &fds.CreateBucketRequest{
-		BucketName: testBucket,
-	}
+	client *fds.Client
+	conf   *fds.ClientConfiguration
 
-	client.CreateBucket(createBucketRequest)
+	Endpoint       string
+	AccessID       string
+	AccessKey      string
+	TestBucketName string
 }
 
-func deleteTestBucket() {
-	exist, _ := client.DoesBucketExist(testBucket)
-	if exist {
-		client.DeleteBucket(testBucket)
+func (suite *GalaxyFDSTestSuite) SetupAllSuite() {
+	suite.Endpoint = os.Getenv("GO_FDS_TEST_ENDPOINT")
+	suite.AccessID = os.Getenv("GO_FDS_TEST_ACCESS_KEY_ID")
+	suite.AccessKey = os.Getenv("GO_FDS_TEST_ACCESS_KEY_SECRET")
+	suite.TestBucketName = "galaxy-fds-sdk-go-testing-bucketname-ut"
+
+	conf, err := fds.NewClientConfiguration(suite.Endpoint)
+	if err != nil {
+		log.Fatalln(err)
 	}
+	suite.conf = conf
+
+	client := fds.New(suite.AccessID, suite.AccessKey, conf)
+	suite.client = client
+}
+
+func (suite *GalaxyFDSTestSuite) GetRandomObjectName() string {
+	pc, _, _, _ := runtime.Caller(1)
+	return "golang-test-" + runtime.FuncForPC(pc).Name() + "-" + time.Now().Format(time.RFC3339)
 }
 
 func TestClient_CreateBucket(t *testing.T) {
