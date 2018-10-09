@@ -1,0 +1,62 @@
+Main:
+  ✔ Option and reflect @started(18-10-02 00:44) @done(18-10-02 00:44) @lasted(26s)
+  ✔ Basic API @done(18-10-04 00:24)
+  ✔ Move dummy code into Client.do() @done(18-10-03 22:49)
+  ✔ Comment @done(18-10-04 12:40)
+  ☐ Concurrent download
+  ☐ Concurrent upload
+  ☐ CI
+
+Bucket API:
+  ✔ CreateBucket @done(18-09-21 16:10)
+  ✔ GetBucketInfo @done(18-09-21 19:41)
+  ✔ DoesBucketExist @done(18-09-21 16:10)
+  ✔ DeleteBucket @done(18-09-21 16:10)
+  ✔ ListBuckets @done(18-09-21 20:10)
+  ✔ ListAuthorizedBuckets @done(18-09-21 20:16)
+  ✔ MigrateBucket @done(18-09-21 20:25)
+  ✔ GetBucketACL @done(18-10-04 10:19)
+  ✔ SetBucketACL @done(18-10-04 10:19)
+  ✘ DeleteBucketACL @cancelled(18-10-04 10:18)
+  ✘ GetLifecycleConfig @cancelled(18-10-04 00:23)
+  ✘ SetLifecycleConfig @cancelled(18-10-04 00:23)
+  ✔ GetAccessLogConfig @done(18-10-03 23:17)
+  ✔ SetAccessLogConfig @done(18-10-03 23:17)
+
+Object API:
+  ✔ PutObject @started(18-10-01 16:00) @done(18-10-01 22:18) @lasted(6h18m53s)
+  ✔ CopyObject @done(18-10-01 22:45)
+  ✔ GetObject @done(18-10-01 16:00)
+  ✔ RenameObject @done(18-10-01 22:52)
+  ✔ DoesObjectExist @done(18-10-01 22:24)
+  ✔ DeleteObject @done(18-10-01 22:56)
+  ✔ DeleteObjects @done(18-10-04 11:35)
+  ✔ GetObjectACL @done(18-10-04 10:53)
+  ✔ SetObjectACL @done(18-10-04 10:53)
+  ✔ SetPublic @done(18-10-04 11:35)
+  ✔ DeleteObjectACL @done(18-10-04 10:18)
+  ✔ GetObjectMetadata @done(18-10-02 00:44)
+  ✔ SetObjectMetadata @done(18-10-02 00:44)
+  ✔ ListObjects @done(18-10-02 16:28)
+  ✔ ListObjectsNextBatch @done(18-10-02 16:28)
+  ✔ RestoreObject @done(18-10-03 22:04)
+
+Multipart Upload:
+  ✔ InitMultipartUpload @done(18-10-02 21:12)
+  ✔ CompleteMultipartUpload @done(18-10-02 21:12)
+  ✔ AbortMultipartUpload @done(18-10-02 21:12)
+  ✔ UploadPart @done(18-10-02 21:12)
+
+Generate URI:
+  ✔ GenerateAbsoluteObjectURL @done(18-10-03 21:28)
+  ✔ GeneratePresignedURL @done(18-10-03 21:28)
+  ✔ GeneratePresignedCDNURL @done(18-10-03 21:59)
+
+Antistealing:
+  ✘ GenerateAntiStealingURI @cancelled(18-10-04 00:23)
+  ✘ GenerateAntiStealingCDNURI @cancelled(18-10-04 00:23)
+  ✘ SetTimestampAntiStealingLinkConfig @cancelled(18-10-04 00:23)
+  ✘ GetTimestampAntiStealingLinkConfig @cancelled(18-10-04 00:23)
+  ✘ DeleteTimestampAntiStealingLinkConfig @cancelled(18-10-04 00:23)
+
+
