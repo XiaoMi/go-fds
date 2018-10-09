@@ -8,6 +8,7 @@ import (
 
 var headerType = reflect.TypeOf(http.Header{})
 
+// Header turns a struct into http.Header
 func Header(v interface{}) (http.Header, error) {
 	h := make(http.Header)
 	val := reflect.ValueOf(v)

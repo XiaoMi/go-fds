@@ -6,6 +6,7 @@ import (
 	"reflect"
 )
 
+// QueryString turns a struct into url.Values
 func QueryString(v interface{}) (url.Values, error) {
 	values := make(url.Values)
 	val := reflect.ValueOf(v)

@@ -6,11 +6,13 @@ import (
 	"strings"
 )
 
+// HTTPRange is a struct replace Range string
 type HTTPRange struct {
 	Start int64
 	End   int64
 }
 
+// Range parse a Http Range string into httpparser.HTTPRange
 func Range(r string) ([]HTTPRange, error) {
 	var ranges []HTTPRange
 

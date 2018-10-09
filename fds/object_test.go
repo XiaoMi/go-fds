@@ -1,13 +1,14 @@
 package fds_test
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/v2tool/galaxy-fds-sdk-go/fds"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/v2tool/galaxy-fds-sdk-go/fds"
 )
 
 var (

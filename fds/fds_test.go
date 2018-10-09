@@ -1,8 +1,9 @@
 package fds_test
 
 import (
-	"github.com/v2tool/galaxy-fds-sdk-go/fds"
 	"os"
+
+	"github.com/v2tool/galaxy-fds-sdk-go/fds"
 )
 
 var (

@@ -1,10 +1,11 @@
 package httpparser_test
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/v2tool/galaxy-fds-sdk-go/fds/httpparser"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/v2tool/galaxy-fds-sdk-go/fds/httpparser"
 )
 
 func TestQueryString(t *testing.T) {

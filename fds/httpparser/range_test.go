@@ -1,10 +1,11 @@
 package httpparser_test
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/v2tool/galaxy-fds-sdk-go/fds/httpparser"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/v2tool/galaxy-fds-sdk-go/fds/httpparser"
 )
 
 func TestOriginRange(t *testing.T) {
