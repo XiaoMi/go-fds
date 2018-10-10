@@ -11,25 +11,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/v2tool/galaxy-fds-sdk-go/fds"
-)
-
-var (
-	// Endpoint/ID/Key
-	endpoint  = os.Getenv("FDS_TEST_ENDPOINT")
-	accessID  = os.Getenv("FDS_TEST_ACCESS_KEY_ID")
-	accessKey = os.Getenv("FDS_TEST_ACCESS_KEY_SECRET")
-
-	testBucket = "galaxy-fds-sdk-go-testing-bucketname-ut"
-
-	conf   *fds.ClientConfiguration
-	client *fds.Client
-)
-
-var (
-	testObjectContent = "Hello world"
-	testObjectName    = "testobjectname"
 )
 
 type GalaxyFDSTestSuite struct {
@@ -44,7 +26,7 @@ type GalaxyFDSTestSuite struct {
 	TestBucketName string
 }
 
-func (suite *GalaxyFDSTestSuite) SetupAllSuite() {
+func (suite *GalaxyFDSTestSuite) SetupSuite() {
 	suite.Endpoint = os.Getenv("GO_FDS_TEST_ENDPOINT")
 	suite.AccessID = os.Getenv("GO_FDS_TEST_ACCESS_KEY_ID")
 	suite.AccessKey = os.Getenv("GO_FDS_TEST_ACCESS_KEY_SECRET")
@@ -60,113 +42,83 @@ func (suite *GalaxyFDSTestSuite) SetupAllSuite() {
 	suite.client = client
 }
 
+func (suite *GalaxyFDSTestSuite) BeforeTest(suiteName, testName string) {
+	err := suite.client.DeleteObjectsWithPrefix(suite.TestBucketName, "", false)
+	suite.Nil(err)
+	suite.client.DeleteBucket(suite.TestBucketName)
+	req := &fds.CreateBucketRequest{
+		BucketName: suite.TestBucketName,
+	}
+	err = suite.client.CreateBucket(req)
+	suite.Nil(err)
+}
+
 func (suite *GalaxyFDSTestSuite) GetRandomObjectName() string {
 	pc, _, _, _ := runtime.Caller(1)
 	return "golang-test-" + runtime.FuncForPC(pc).Name() + "-" + time.Now().Format(time.RFC3339)
 }
 
-func TestClient_CreateBucket(t *testing.T) {
-	exist, _ := client.DoesBucketExist(testBucket)
-	if exist {
-		e := client.DeleteBucket(testBucket)
-		assert.Nil(t, e)
-	}
+// Already test it in BeforeTest
+func (suite *GalaxyFDSTestSuite) TestCreateBucket() {}
 
-	createBucketRequest := &fds.CreateBucketRequest{
-		BucketName: testBucket,
-	}
+func (suite *GalaxyFDSTestSuite) TestDoesBucketExist() {
+	b, e := suite.client.DoesBucketExist(suite.TestBucketName)
+	suite.Nil(e)
+	suite.True(b)
 
-	err := client.CreateBucket(createBucketRequest)
-	assert.Nil(t, err)
+	e = suite.client.DeleteBucket(suite.TestBucketName)
+	suite.Nil(e)
 
-	err = client.CreateBucket(createBucketRequest)
-	assert.NotNil(t, err)
+	b, e = suite.client.DoesBucketExist(suite.TestBucketName)
+	suite.Nil(e)
+	suite.False(b)
 }
 
-func TestClient_DoesBucketExist(t *testing.T) {
-	client.DeleteBucket(testBucket)
+// Already test it in TestDoesBucketExist
+func (suite *GalaxyFDSTestSuite) TestDeleteBucket() {}
 
-	b, e := client.DoesBucketExist(testBucket)
-	assert.Nil(t, e)
-	assert.False(t, b)
+func (suite *GalaxyFDSTestSuite) TestGetBucketInfo() {
+	response, e := suite.client.GetBucketInfo(suite.TestBucketName)
+	suite.Nil(e)
+	suite.NotNil(response)
+	suite.Equal(suite.TestBucketName, response.BucketName)
 }
 
-func TestClient_DeleteBucket(t *testing.T) {
-	exist, _ := client.DoesBucketExist(testBucket)
-	if !exist {
-		createBucketRequest := &fds.CreateBucketRequest{
-			BucketName: testBucket,
-		}
-		client.CreateBucket(createBucketRequest)
-	}
-
-	e := client.DeleteBucket(testBucket)
-	assert.Nil(t, e)
-	e = client.DeleteBucket(testBucket)
-	assert.NotNil(t, e)
+func (suite *GalaxyFDSTestSuite) TestListBuckets() {
+	response, e := suite.client.ListBuckets()
+	suite.Nil(e)
+	suite.NotNil(response)
 }
 
-func TestClient_GetBucketInfo(t *testing.T) {
-	exist, _ := client.DoesBucketExist(testBucket)
-	if !exist {
-		createBucketRequest := &fds.CreateBucketRequest{
-			BucketName: testBucket,
-		}
-		client.CreateBucket(createBucketRequest)
-	}
-
-	response, e := client.GetBucketInfo(testBucket)
-	assert.Nil(t, e)
-	assert.NotNil(t, response)
-}
-
-func TestClient_ListBuckets(t *testing.T) {
-	exist, _ := client.DoesBucketExist(testBucket)
-	if !exist {
-		createBucketRequest := &fds.CreateBucketRequest{
-			BucketName: testBucket,
-		}
-		client.CreateBucket(createBucketRequest)
-	}
-
-	response, e := client.ListBuckets()
-	assert.Nil(t, e)
-	assert.NotNil(t, response)
-}
-
-func TestClient_GetObject(t *testing.T) {
+func (suite *GalaxyFDSTestSuite) TestGetObject() {
+	testObjectName := suite.GetRandomObjectName()
+	testObjectContent := "Hello World"
 	putObjectRequest := &fds.PutObjectRequest{
-		BucketName: testBucket,
+		BucketName: suite.TestBucketName,
 		ObjectName: testObjectName,
 		Data:       strings.NewReader(testObjectContent),
 	}
 
-	_, e := client.PutObject(putObjectRequest)
-	assert.Nil(t, e)
+	response, e := suite.client.PutObject(putObjectRequest)
+	suite.Nil(e)
+	suite.Equal(response.ObjectName, testObjectName)
 
 	getObjectRequest := &fds.GetObjectRequest{
-		BucketName: testBucket,
+		BucketName: suite.TestBucketName,
 		ObjectName: testObjectName,
 	}
 
-	rc, e := client.GetObject(getObjectRequest)
-	assert.Nil(t, e)
+	rc, e := suite.client.GetObject(getObjectRequest)
+	suite.Nil(e)
 	defer rc.Close()
 
 	b, e := ioutil.ReadAll(rc)
-	assert.Equal(t, string(b), testObjectContent)
+	suite.Equal(string(b), testObjectContent)
 }
 
-func TestClient_PutObject(t *testing.T) {
-	putObjectRequest := &fds.PutObjectRequest{
-		BucketName: testBucket,
-		ObjectName: testObjectName,
-		Data:       strings.NewReader(testObjectContent),
-	}
+// Already test it in TestGetObject
+func (suite *GalaxyFDSTestSuite) TestPutObject() {}
 
-	putObjectResponse, e := client.PutObject(putObjectRequest)
-	assert.Nil(t, e)
-
-	assert.Equal(t, putObjectResponse.BucketName, testBucket)
-	assert.Equal(t, putObjectResponse.ObjectName, testObjectName)
+func TestGalaxyFDSuite(t *testing.T) {
+	suite.Run(t, new(GalaxyFDSTestSuite))
 }
