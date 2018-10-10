@@ -215,18 +215,18 @@ func (client *Client) DeleteObjectsWithPrefix(bucketName, prefix string, put2sta
 	}
 
 	for {
-		var names []string
+		names := make([]string, 0)
 		for _, o := range objectListing.ObjectSummaries {
 			names = append(names, o.ObjectName)
-		}
-
-		if !objectListing.Truncated {
-			break
 		}
 
 		err = client.DeleteObjects(bucketName, names, put2stash)
 		if err != nil {
 			return err
+		}
+
+		if !objectListing.Truncated {
+			break
 		}
 
 		objectListing, err = client.ListObjectsNextBatch(objectListing)
