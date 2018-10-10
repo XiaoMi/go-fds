@@ -154,9 +154,9 @@ func checkResponseStatus(response *http.Response, allowed []int) error {
 	statusCode := response.StatusCode
 
 	var err error
+	var respBody []byte
 	if statusCode >= 400 && statusCode <= 505 {
-		var respBody []byte
-		respBody, err := readResponseBody(response)
+		respBody, err = readResponseBody(response)
 		if err != nil {
 			return err
 		}
