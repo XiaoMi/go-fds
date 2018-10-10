@@ -19,3 +19,6 @@
 
 # bin
 galaxy-fds-sdk-go
+
+# env file for debug
+.env
