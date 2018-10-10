@@ -44,6 +44,6 @@ func main() {
 }
 ```
 
-For more sample, please look into `sample` package.
+For more sample, please look into `fds/fds_test.go` file.
 
 ## License
