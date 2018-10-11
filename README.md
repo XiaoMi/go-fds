@@ -2,6 +2,7 @@
 FDS Go SDK.
 
 [![Build Status](https://travis-ci.org/v2tool/galaxy-fds-sdk-go.svg?branch=master)](https://travis-ci.org/v2tool/galaxy-fds-sdk-go)
+[![Go Report Card](https://goreportcard.com/badge/github.com/v2tool/galaxy-fds-sdk-go)](https://goreportcard.com/report/github.com/v2tool/galaxy-fds-sdk-go)
 
 [The formal Go sdk of FDS](https://github.com/XiaoMi/galaxy-fds-sdk-golang) is not well designed, but constrained by the fixed interface, I can't reconstruct it in large scale.
 

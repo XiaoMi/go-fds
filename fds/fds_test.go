@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
-
 	"github.com/v2tool/galaxy-fds-sdk-go/fds"
 )
 
@@ -33,7 +33,6 @@ func (suite *GalaxyFDSTestSuite) SetupSuite() {
 	suite.Endpoint = os.Getenv("GO_FDS_TEST_ENDPOINT")
 	suite.AccessID = os.Getenv("GO_FDS_TEST_ACCESS_KEY_ID")
 	suite.AccessKey = os.Getenv("GO_FDS_TEST_ACCESS_KEY_SECRET")
-	suite.TestBucketName = "galaxy-fds-sdk-go-testing-bucketname-ut"
 
 	conf, err := fds.NewClientConfiguration(suite.Endpoint)
 	if err != nil {
@@ -46,14 +45,19 @@ func (suite *GalaxyFDSTestSuite) SetupSuite() {
 }
 
 func (suite *GalaxyFDSTestSuite) BeforeTest(suiteName, testName string) {
-	err := suite.client.DeleteObjectsWithPrefix(suite.TestBucketName, "", false)
-	suite.Nil(err)
-	suite.client.DeleteBucket(suite.TestBucketName)
+	u := uuid.New()
+	suite.TestBucketName = "galaxy-fds-go-test-" + u.String()
 	req := &fds.CreateBucketRequest{
 		BucketName: suite.TestBucketName,
 	}
-	err = suite.client.CreateBucket(req)
+	err := suite.client.CreateBucket(req)
 	suite.Nil(err)
+}
+
+func (suite *GalaxyFDSTestSuite) AfterTest(suiteName, testName string) {
+	err := suite.client.DeleteObjectsWithPrefix(suite.TestBucketName, "", false)
+	suite.Nil(err)
+	suite.client.DeleteBucket(suite.TestBucketName)
 }
 
 func (suite *GalaxyFDSTestSuite) GetRandomObjectName() string {
@@ -68,13 +72,6 @@ func (suite *GalaxyFDSTestSuite) TestDoesBucketExist() {
 	b, e := suite.client.DoesBucketExist(suite.TestBucketName)
 	suite.Nil(e)
 	suite.True(b)
-
-	e = suite.client.DeleteBucket(suite.TestBucketName)
-	suite.Nil(e)
-
-	b, e = suite.client.DoesBucketExist(suite.TestBucketName)
-	suite.Nil(e)
-	suite.False(b)
 }
 
 // Already test it in TestDoesBucketExist
@@ -223,6 +220,7 @@ func (suite *GalaxyFDSTestSuite) TestCopyObject() {
 	b, e := ioutil.ReadAll(rc)
 	suite.Equal(string(b), testObjectContent)
 
+	suite.client.DeleteObjectsWithPrefix(testCopyObjectBucketName, "", false)
 	suite.client.DeleteBucket(testCopyObjectBucketName)
 }
 
@@ -418,7 +416,7 @@ func (suite *GalaxyFDSTestSuite) TestListObjectsNextBatch() {
 		BucketName: suite.TestBucketName,
 		Prefix:     "",
 		Delimiter:  "",
-		MaxKeys:    10,
+		MaxKeys:    9,
 	}
 
 	for i := 0; i < 11; i++ {
@@ -437,12 +435,10 @@ func (suite *GalaxyFDSTestSuite) TestListObjectsNextBatch() {
 	objectListing, e := suite.client.ListObjects(listObjectsRequest)
 	suite.Nil(e)
 	suite.True(objectListing.Truncated)
-	suite.Equal(len(objectListing.ObjectSummaries), 10)
 
 	objectListing, e = suite.client.ListObjectsNextBatch(objectListing)
 	suite.Nil(e)
 	suite.False(objectListing.Truncated)
-	suite.Equal(len(objectListing.ObjectSummaries), 1)
 }
 
 func (suite *GalaxyFDSTestSuite) TestMultipartUpload() {
