@@ -344,6 +344,27 @@ func (suite *GalaxyFDSTestSuite) TestDeleteObjectsWithPrefix() {
 	}
 }
 
+func (suite *GalaxyFDSTestSuite) TestGetObjectMetadata() {
+	testObjectName := suite.GetRandomObjectName()
+	testObjectContent := "Hello World"
+
+	putObjectRequest := &fds.PutObjectRequest{
+		BucketName: suite.TestBucketName,
+		ObjectName: testObjectName,
+		Data:       strings.NewReader(testObjectContent),
+	}
+
+	response, e := suite.client.PutObject(putObjectRequest)
+	suite.Nil(e)
+	suite.Equal(response.ObjectName, testObjectName)
+
+	md, e := suite.client.GetObjectMetadata(suite.TestBucketName, testObjectName)
+	suite.Nil(e)
+	contentLength, e := md.GetContentLength()
+	suite.Nil(e)
+	suite.Equal(int64(11), contentLength)
+}
+
 func TestGalaxyFDSuite(t *testing.T) {
 	suite.Run(t, new(GalaxyFDSTestSuite))
 }
