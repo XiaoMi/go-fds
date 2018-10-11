@@ -1,8 +1,10 @@
 package fds_test
 
 import (
+	"bytes"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"runtime"
 	"strconv"
@@ -441,6 +443,168 @@ func (suite *GalaxyFDSTestSuite) TestListObjectsNextBatch() {
 	suite.Nil(e)
 	suite.False(objectListing.Truncated)
 	suite.Equal(len(objectListing.ObjectSummaries), 1)
+}
+
+func (suite *GalaxyFDSTestSuite) TestMultipartUpload() {
+	testObjectName := suite.GetRandomObjectName()
+
+	initMultipartUploadRequest := &fds.InitMultipartUploadRequest{
+		BucketName: suite.TestBucketName,
+		ObjectName: testObjectName,
+	}
+
+	initMultipartUploadResponse, e := suite.client.InitMultipartUpload(initMultipartUploadRequest)
+	suite.Nil(e)
+	suite.Equal(testObjectName, initMultipartUploadResponse.ObjectName)
+
+	var uploadPartResultList []fds.UploadPartResponse
+
+	for i := 1; i < 3; i++ {
+		uploadPartRequest := &fds.UploadPartRequest{
+			BucketName: suite.TestBucketName,
+			ObjectName: testObjectName,
+			UploadID:   initMultipartUploadResponse.UploadID,
+			PartNumber: i,
+			Data:       bytes.NewReader(make([]byte, 39498485)),
+		}
+		uploadResponse, e := suite.client.UploadPart(uploadPartRequest)
+		suite.Nil(e)
+		uploadPartResultList = append(uploadPartResultList, *uploadResponse)
+	}
+	uploadPartList := &fds.UploadPartList{
+		UploadPartResultList: uploadPartResultList,
+	}
+
+	putObjectResponse, e := suite.client.CompleteMultipartUpload(initMultipartUploadResponse, uploadPartList)
+	suite.Nil(e)
+	suite.Equal(testObjectName, putObjectResponse.ObjectName)
+}
+
+func (suite *GalaxyFDSTestSuite) TestRestoreObject() {
+	testObjectName := suite.GetRandomObjectName()
+	testObjectContent := "Hello World"
+	putObjectRequest := &fds.PutObjectRequest{
+		BucketName: suite.TestBucketName,
+		ObjectName: testObjectName,
+		Data:       strings.NewReader(testObjectContent),
+	}
+
+	response, e := suite.client.PutObject(putObjectRequest)
+	suite.Nil(e)
+	suite.Equal(response.ObjectName, testObjectName)
+
+	e = suite.client.DeleteObject(suite.TestBucketName, testObjectName)
+	suite.Nil(e)
+
+	b, e := suite.client.DoesObjectExist(suite.TestBucketName, testObjectName)
+	suite.Nil(e)
+	suite.False(b)
+
+	e = suite.client.RestoreObject(suite.TestBucketName, testObjectName)
+	suite.Nil(e)
+
+	b, e = suite.client.DoesObjectExist(suite.TestBucketName, testObjectName)
+	suite.Nil(e)
+	suite.True(b)
+}
+
+// already testit in TestSetObjectPublic
+func (suite *GalaxyFDSTestSuite) TestGenerateAbsoluteObjectURL() {}
+
+func (suite *GalaxyFDSTestSuite) TestGeneratePresignedURL() {
+	testObjectName := suite.GetRandomObjectName()
+	testObjectContent := "Hello World"
+	putObjectRequest := &fds.PutObjectRequest{
+		BucketName: suite.TestBucketName,
+		ObjectName: testObjectName,
+		Data:       strings.NewReader(testObjectContent),
+	}
+
+	_, e := suite.client.PutObject(putObjectRequest)
+	suite.Nil(e)
+
+	generatePresignedURLRequest := &fds.GeneratePresignedURLRequest{
+		CDN:        false,
+		BucketName: suite.TestBucketName,
+		ObjectName: testObjectName,
+		Method:     fds.HTTPGet,
+		Expiration: time.Now().Add(time.Second * 10),
+		Metadata:   fds.NewObjectMetadata(),
+	}
+	u, e := suite.client.GeneratePresignedURL(generatePresignedURLRequest)
+	suite.Nil(e)
+	suite.NotNil(u)
+	log.Println(u.String())
+}
+
+// already test it in TestSetObjectACL
+func (suite *GalaxyFDSTestSuite) TestGetObjectACL() {}
+
+func (suite *GalaxyFDSTestSuite) TestSetObjectACL() {
+	testObjectName := suite.GetRandomObjectName()
+	testObjectContent := "Hello World"
+	putObjectRequest := &fds.PutObjectRequest{
+		BucketName: suite.TestBucketName,
+		ObjectName: testObjectName,
+		Data:       strings.NewReader(testObjectContent),
+	}
+
+	_, e := suite.client.PutObject(putObjectRequest)
+	suite.Nil(e)
+
+	grant := fds.Grant{
+		Grantee: fds.GrantKey{
+			ID: "ALL_USERS",
+		},
+		Permission: fds.GrantPermissionRead,
+		Type:       fds.GrantTypeGroup,
+	}
+
+	controlList := &fds.AccessControlList{}
+	controlList.AddGrant(grant)
+
+	setObjectACLRequest := &fds.SetObjectACLRequest{
+		BucketName: suite.TestBucketName,
+		ObjectName: testObjectName,
+		ACL:        controlList,
+	}
+
+	e = suite.client.SetObjectACL(setObjectACLRequest)
+	suite.Nil(e)
+
+	getObjectACLRequest := &fds.GetObjectACLRequest{
+		BucketName: suite.TestBucketName,
+		ObjectName: testObjectName,
+	}
+
+	acl, e := suite.client.GetObjectACL(getObjectACLRequest)
+	suite.Nil(e)
+	suite.Equal(2, len(acl.Grants))
+}
+
+func (suite *GalaxyFDSTestSuite) TestSetObjectPublic() {
+	testObjectName := suite.GetRandomObjectName()
+	testObjectContent := "Hello World"
+	putObjectRequest := &fds.PutObjectRequest{
+		BucketName: suite.TestBucketName,
+		ObjectName: testObjectName,
+		Data:       strings.NewReader(testObjectContent),
+	}
+
+	_, e := suite.client.PutObject(putObjectRequest)
+	suite.Nil(e)
+
+	u := suite.client.GenerateAbsoluteObjectURL(suite.TestBucketName, testObjectName)
+	resp, e := http.Get(u.String())
+	suite.Nil(e)
+	suite.Equal(http.StatusForbidden, resp.StatusCode)
+
+	e = suite.client.SetObjectPublic(suite.TestBucketName, testObjectName)
+	suite.Nil(e)
+
+	resp, e = http.Get(u.String())
+	suite.Nil(e)
+	suite.Equal(http.StatusOK, resp.StatusCode)
 }
 
 func TestGalaxyFDSuite(t *testing.T) {
