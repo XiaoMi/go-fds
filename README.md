@@ -1,6 +1,8 @@
 # galaxy-fds-sdk-go
 FDS Go SDK.
 
+[![Build Status](https://travis-ci.org/v2tool/galaxy-fds-sdk-go.svg?branch=master)](https://travis-ci.org/v2tool/galaxy-fds-sdk-go)
+
 [The formal Go sdk of FDS](https://github.com/XiaoMi/galaxy-fds-sdk-golang) is not well designed, but constrained by the fixed interface, I can't reconstruct it in large scale.
 
 So, I start up this project for a good sdk design. 
