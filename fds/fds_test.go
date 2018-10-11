@@ -362,7 +362,38 @@ func (suite *GalaxyFDSTestSuite) TestGetObjectMetadata() {
 	suite.Nil(e)
 	contentLength, e := md.GetContentLength()
 	suite.Nil(e)
-	suite.Equal(int64(11), contentLength)
+	suite.Equal(int64(len(testObjectContent)), contentLength)
+}
+
+func (suite *GalaxyFDSTestSuite) TestSetObjectMetadata() {
+	testObjectName := suite.GetRandomObjectName()
+	testObjectContent := "Hello World"
+
+	putObjectRequest := &fds.PutObjectRequest{
+		BucketName: suite.TestBucketName,
+		ObjectName: testObjectName,
+		Data:       strings.NewReader(testObjectContent),
+	}
+
+	response, e := suite.client.PutObject(putObjectRequest)
+	suite.Nil(e)
+	suite.Equal(response.ObjectName, testObjectName)
+
+	md := fds.NewObjectMetadata()
+	md.Set(fds.XiaomiMetaPrefix+"test", "10")
+
+	setObjectMetadataRequest := &fds.SetObjectMetadataRequest{
+		BucketName: suite.TestBucketName,
+		ObjectName: testObjectName,
+		Metadata:   md,
+	}
+
+	e = suite.client.SetObjectMetadata(setObjectMetadataRequest)
+	suite.Nil(e)
+
+	md, e = suite.client.GetObjectMetadata(suite.TestBucketName, testObjectName)
+	suite.Nil(e)
+	suite.Equal(md.Get(fds.XiaomiMetaPrefix+"test"), "10")
 }
 
 func TestGalaxyFDSuite(t *testing.T) {
