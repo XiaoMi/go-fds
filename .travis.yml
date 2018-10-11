@@ -9,6 +9,7 @@ go:
 sudo: false
 
 before_install:
+  - export TZ='Asia/Shanghai'
   - go get github.com/stretchr/testify
 
 install:
