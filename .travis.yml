@@ -12,13 +12,11 @@ before_install:
   - go get github.com/stretchr/testify
 
 install:
-  - go get
-  - go build
+  - go get ./fds/
 
 script:
   - make test
-  - go test -coverprofile=cover.out github.com/mozillazg/go-cos
-  - $HOME/gopath/bin/goveralls -service=travis-ci -coverprofile=cover.out
+  - make lint
 
 matrix:
   allow_failures:
