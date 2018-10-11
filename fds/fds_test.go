@@ -534,7 +534,6 @@ func (suite *GalaxyFDSTestSuite) TestGeneratePresignedURL() {
 	u, e := suite.client.GeneratePresignedURL(generatePresignedURLRequest)
 	suite.Nil(e)
 	suite.NotNil(u)
-	log.Println(u.String())
 }
 
 // already test it in TestSetObjectACL
