@@ -396,6 +396,53 @@ func (suite *GalaxyFDSTestSuite) TestSetObjectMetadata() {
 	suite.Equal(md.Get(fds.XiaomiMetaPrefix+"test"), "10")
 }
 
+func (suite *GalaxyFDSTestSuite) TestListObjects() {
+	listObjectsRequest := &fds.ListObjectsRequest{
+		BucketName: suite.TestBucketName,
+		Prefix:     "",
+		Delimiter:  "",
+		MaxKeys:    10,
+	}
+
+	objectListing, e := suite.client.ListObjects(listObjectsRequest)
+	suite.Nil(e)
+	suite.False(objectListing.Truncated)
+	suite.Empty(objectListing.ObjectSummaries)
+}
+
+func (suite *GalaxyFDSTestSuite) TestListObjectsNextBatch() {
+	testObjectContent := "Hello World"
+	listObjectsRequest := &fds.ListObjectsRequest{
+		BucketName: suite.TestBucketName,
+		Prefix:     "",
+		Delimiter:  "",
+		MaxKeys:    10,
+	}
+
+	for i := 0; i < 11; i++ {
+		objectName := "prefix/" + strconv.FormatInt(int64(i), 10)
+		putObjectRequest := &fds.PutObjectRequest{
+			BucketName: suite.TestBucketName,
+			ObjectName: objectName,
+			Data:       strings.NewReader(testObjectContent),
+		}
+
+		response, e := suite.client.PutObject(putObjectRequest)
+		suite.Nil(e)
+		suite.Equal(response.ObjectName, objectName)
+	}
+
+	objectListing, e := suite.client.ListObjects(listObjectsRequest)
+	suite.Nil(e)
+	suite.True(objectListing.Truncated)
+	suite.Equal(len(objectListing.ObjectSummaries), 10)
+
+	objectListing, e = suite.client.ListObjectsNextBatch(objectListing)
+	suite.Nil(e)
+	suite.False(objectListing.Truncated)
+	suite.Equal(len(objectListing.ObjectSummaries), 1)
+}
+
 func TestGalaxyFDSuite(t *testing.T) {
 	suite.Run(t, new(GalaxyFDSTestSuite))
 }
