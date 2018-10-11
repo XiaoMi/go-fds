@@ -22,3 +22,6 @@ galaxy-fds-sdk-go
 
 # env file for debug
 .env
+
+cover.html
+cover.out

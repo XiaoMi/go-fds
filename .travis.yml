@@ -1,0 +1,25 @@
+language: go
+go:
+  - 1.7
+  - 1.8
+  - 1.9
+  - '1.10'
+  - master
+
+sudo: false
+
+before_install:
+  - go get github.com/stretchr/testify
+
+install:
+  - go get
+  - go build
+
+script:
+  - make test
+  - go test -coverprofile=cover.out github.com/mozillazg/go-cos
+  - $HOME/gopath/bin/goveralls -service=travis-ci -coverprofile=cover.out
+
+matrix:
+  allow_failures:
+    - go: master
