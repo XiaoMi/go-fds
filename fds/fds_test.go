@@ -13,8 +13,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/hujianxin/galaxy-fds-sdk-go/fds"
 	"github.com/stretchr/testify/suite"
-	"github.com/v2tool/galaxy-fds-sdk-go/fds"
 )
 
 type GalaxyFDSTestSuite struct {

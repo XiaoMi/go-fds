@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hujianxin/galaxy-fds-sdk-go/fds/httpparser"
 	"github.com/stretchr/testify/assert"
-	"github.com/v2tool/galaxy-fds-sdk-go/fds/httpparser"
 )
 
 func TestOriginRange(t *testing.T) {

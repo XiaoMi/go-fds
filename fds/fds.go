@@ -15,8 +15,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hujianxin/galaxy-fds-sdk-go/fds/httpparser"
 	"github.com/sirupsen/logrus"
-	"github.com/v2tool/galaxy-fds-sdk-go/fds/httpparser"
 )
 
 // Client supplies an interface for interaction with FDS

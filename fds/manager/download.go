@@ -10,9 +10,9 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/hujianxin/galaxy-fds-sdk-go/fds"
+	"github.com/hujianxin/galaxy-fds-sdk-go/fds/httpparser"
 	"github.com/sirupsen/logrus"
-	"github.com/v2tool/galaxy-fds-sdk-go/fds"
-	"github.com/v2tool/galaxy-fds-sdk-go/fds/httpparser"
 )
 
 // Downloader is a FDS client for file concurrency download
