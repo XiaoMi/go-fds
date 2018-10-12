@@ -263,10 +263,10 @@ func (downloader *Downloader) Download(request *DownloadRequest) error {
 
 	tmpFilePath := request.FilePath + ".tmp"
 	for i := 1; i < downloader.Concurrency; i++ {
-		go downloader.consume(i, request, tmpFilePath, jobs, results, failed, finished)
+		go downloader.downloaderTaskConsumer(i, request, tmpFilePath, jobs, results, failed, finished)
 	}
 
-	go downloader.produce(jobs, parts)
+	go downloader.downloaderTaskProducer(jobs, parts)
 
 	completed := 0
 	for completed < len(parts) {
@@ -289,7 +289,7 @@ func (downloader *Downloader) Download(request *DownloadRequest) error {
 	return os.Rename(tmpFilePath, request.FilePath)
 }
 
-func (downloader *Downloader) consume(id int,
+func (downloader *Downloader) downloaderTaskConsumer(id int,
 	request *DownloadRequest, tmpFilePath string, jobs <-chan part, results chan<- part, failed chan<- error, finished <-chan bool) {
 	for p := range jobs {
 		req := &fds.GetObjectRequest{
@@ -337,7 +337,7 @@ func (downloader *Downloader) consume(id int,
 	}
 }
 
-func (downloader *Downloader) produce(jobs chan part, parts []part) {
+func (downloader *Downloader) downloaderTaskProducer(jobs chan part, parts []part) {
 	for _, p := range parts {
 		jobs <- p
 	}

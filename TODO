@@ -3,9 +3,9 @@ Main:
   ✔ Basic API @done(18-10-04 00:24)
   ✔ Move dummy code into Client.do() @done(18-10-03 22:49)
   ✔ Comment @done(18-10-04 12:40)
-  ☐ Concurrent download
-  ☐ Concurrent upload
-  ☐ CI
+  ✔ Concurrent download @done(18-10-13 01:25)
+  ☐ Concurrent upload @started(18-10-13 01:25)
+  ✔ CI @done(18-10-13 01:25)
 
 Bucket API:
   ✔ CreateBucket @done(18-09-21 16:10)
@@ -18,8 +18,8 @@ Bucket API:
   ✔ GetBucketACL @done(18-10-04 10:19)
   ✔ SetBucketACL @done(18-10-04 10:19)
   ✘ DeleteBucketACL @cancelled(18-10-04 10:18)
-  ✘ GetLifecycleConfig @cancelled(18-10-04 00:23)
-  ✘ SetLifecycleConfig @cancelled(18-10-04 00:23)
+  ☐ GetLifecycleConfig
+  ☐ SetLifecycleConfig
   ✔ GetAccessLogConfig @done(18-10-03 23:17)
   ✔ SetAccessLogConfig @done(18-10-03 23:17)
 
