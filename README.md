@@ -9,9 +9,7 @@ FDS Go SDK.
 So, I start up this project for a good sdk design. 
 
 ## Install
-In order to use this FDS Client, you should upgrade your goland to 1.11+.
-
-`go get -u github.com/v2tool/galaxy-fds-sdk-go`
+`go get -u github.com/hujianxin/galaxy-fds-sdk-go`
 
 ## Usage
 ```go
@@ -21,8 +19,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/v2tool/galaxy-fds-sdk-go/fds"
-	"github.com/v2tool/galaxy-fds-sdk-go/fds/manager"
+	"github.com/hujianxin/galaxy-fds-sdk-go/fds"
+	"github.com/hujianxin/galaxy-fds-sdk-go/fds/manager"
 )
 
 func main() {
@@ -49,4 +47,8 @@ func main() {
 
 For more sample, please look into `fds/fds_test.go` file.
 
+## Development
+To develop galaxy-fds-sdk-go, you'd better to upgrade your go version to 1.11+，because there is a `go modules` concept from go1.11, which can make it convenient.
+
 ## License
+MIT
