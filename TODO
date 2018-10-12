@@ -19,7 +19,6 @@ Bucket API:
   ✔ MigrateBucket @done(18-09-21 20:25)
   ✔ GetBucketACL @done(18-10-04 10:19)
   ✔ SetBucketACL @done(18-10-04 10:19)
-  ✘ DeleteBucketACL @cancelled(18-10-04 10:18)
   ☐ GetLifecycleConfig
   ☐ SetLifecycleConfig
   ✔ GetAccessLogConfig @done(18-10-03 23:17)
@@ -54,7 +53,8 @@ Generate URI:
   ✔ GeneratePresignedURL @done(18-10-03 21:28)
   ✔ GeneratePresignedCDNURL @done(18-10-03 21:59)
 
-Antistealing:
+Cancelled:
+  ✘ DeleteBucketACL @cancelled(18-10-04 10:18)
   ✘ GenerateAntiStealingURI @cancelled(18-10-04 00:23)
   ✘ GenerateAntiStealingCDNURI @cancelled(18-10-04 00:23)
   ✘ SetTimestampAntiStealingLinkConfig @cancelled(18-10-04 00:23)
