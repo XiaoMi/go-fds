@@ -5,6 +5,8 @@ Main:
   ✔ Comment @done(18-10-04 12:40)
   ✔ Concurrent download @done(18-10-13 01:25)
   ☐ Concurrent upload @started(18-10-13 01:25)
+  ☐ Document in doc.go
+  ☐ More elegent comments
   ✔ CI @done(18-10-13 01:25)
 
 Bucket API:
