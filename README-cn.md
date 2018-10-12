@@ -13,10 +13,8 @@
 
 最后，auth.go里面的signature方法是直接使用了旧SDK中的代码。
 
-在开发新的sdk的过程中，需要使用go version1.11+，其中使用了go语言新概念，go modules。由此，咱们的代码可以通过git submodule的方式放入galaxy工程内部，而并不是非得放到gopath里面，方便管理。
-
 ## 安装
-`go get -u github.com/v2tool/galaxy-fds-sdk-go`
+`go get -u github.com/hujianxin/galaxy-fds-sdk-go`
 
 ## 用法
 ```go
@@ -26,8 +24,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/v2tool/galaxy-fds-sdk-go/fds"
-	"github.com/v2tool/galaxy-fds-sdk-go/fds/manager"
+	"github.com/hujianxin/galaxy-fds-sdk-go/fds"
+	"github.com/hujianxin/galaxy-fds-sdk-go/fds/manager"
 )
 
 func main() {
