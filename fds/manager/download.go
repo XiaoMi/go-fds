@@ -26,7 +26,15 @@ type Downloader struct {
 }
 
 // NewDownloader new a downloader
-func NewDownloader(client *fds.Client, partSize int64, concurrency int, breakpoint bool) *Downloader {
+func NewDownloader(client *fds.Client, partSize int64, concurrency int, breakpoint bool) (*Downloader, error) {
+	if partSize < 1 {
+		return nil, ErrorPartSizeSmallerThanOne
+	}
+
+	if concurrency < 1 {
+		return nil, ErrorConcurrencySmallerThanOne
+	}
+
 	downloader := &Downloader{
 		PartSize:    partSize,
 		Concurrency: concurrency,
@@ -37,158 +45,22 @@ func NewDownloader(client *fds.Client, partSize int64, concurrency int, breakpoi
 	downloader.logger = logrus.New()
 	downloader.logger.SetLevel(logrus.WarnLevel)
 
-	return downloader
-}
-
-type breakpointInfo struct {
-	FilePath   string
-	BucketName string
-	ObjectName string
-	ObjectStat objectStat
-	Parts      []part
-	PartStat   []bool
-	Start      int64
-	End        int64
-	MD5        string
-
-	downloader *Downloader
-}
-
-type objectStat struct {
-	Size         int64  // Object size
-	LastModified string // Last modified time
-}
-
-func (bp *breakpointInfo) Load(path string) error {
-	data, err := ioutil.ReadFile(path)
-	if err != nil {
-		return err
-	}
-
-	return json.Unmarshal(data, bp)
-}
-
-func (bp *breakpointInfo) Dump() error {
-	bpi := *bp
-
-	bpi.MD5 = ""
-	data, err := json.Marshal(bpi)
-	if err != nil {
-		return err
-	}
-
-	sum := md5.Sum(data)
-	b64 := base64.StdEncoding.EncodeToString(sum[:])
-	bpi.MD5 = b64
-
-	data, err = json.Marshal(bpi)
-	if err != nil {
-		return err
-	}
-
-	return ioutil.WriteFile(bpi.FilePath, data, os.FileMode(0664))
-}
-
-func (bp *breakpointInfo) Validate(bucketName, objectName string, r httpparser.HTTPRange) error {
-	if bucketName != bp.BucketName || objectName != bp.ObjectName {
-		return fmt.Errorf("BucketName or ObjectName is not matching")
-	}
-
-	bpi := *bp
-	bpi.MD5 = ""
-	data, err := json.Marshal(bpi)
-	if err != nil {
-		return err
-	}
-	sum := md5.Sum(data)
-	b64 := base64.StdEncoding.EncodeToString(sum[:])
-	if b64 != bp.MD5 {
-		return fmt.Errorf("MD5 is not matching")
-	}
-
-	c := bp.downloader.client
-	metadata, err := c.GetObjectMetadata(bucketName, objectName)
-	if err != nil {
-		return err
-	}
-
-	length, err := metadata.GetContentLength()
-	if err != nil {
-		return err
-	}
-	if bp.ObjectStat.Size != length || bp.ObjectStat.LastModified != metadata.Get(fds.HTTPHeaderLastModified) {
-		return fmt.Errorf("Object state is not matching")
-	}
-
-	if bp.Start != r.Start || bp.End != r.End {
-		return fmt.Errorf("Range is not matching")
-	}
-
-	return nil
-}
-
-func (bp *breakpointInfo) UnfinishParts() []part {
-	var result []part
-
-	for i, s := range bp.PartStat {
-		if !s {
-			result = append(result, bp.Parts[i])
-		}
-	}
-
-	return result
-}
-
-func (bp *breakpointInfo) Initilize(downloader *Downloader,
-	bucketName, objectName, filePath string, r httpparser.HTTPRange, md *fds.ObjectMetadata) error {
-	bp.MD5 = ""
-	bp.BucketName = bucketName
-	bp.ObjectName = objectName
-	bp.FilePath = filePath
-	bp.Start = r.Start
-	bp.End = r.End
-	bp.downloader = downloader
-
-	contentLength, err := md.GetContentLength()
-	if err != nil {
-		return err
-	}
-
-	parts, err := downloader.splitDownloadParts(contentLength, r)
-	if err != nil {
-		return err
-	}
-	bp.Parts = parts
-
-	bp.PartStat = make([]bool, len(bp.Parts))
-
-	bp.ObjectStat = objectStat{
-		Size:         contentLength,
-		LastModified: md.Get(fds.HTTPHeaderLastModified),
-	}
-
-	return nil
-}
-
-func (bp *breakpointInfo) Destroy() {
-	os.Remove(bp.FilePath)
+	return downloader, nil
 }
 
 // DownloadRequest is the input of Download
 type DownloadRequest struct {
 	fds.GetObjectRequest
-	FilePath           string
-	BreakpointFilePath string
+	FilePath string
+
+	// private
+	breakpointFilePath string
 }
 
 // Download performs the downloading action
 func (downloader *Downloader) Download(request *DownloadRequest) error {
-	if downloader.PartSize < 1 {
-		return fmt.Errorf("client: part size should not be smaller than 1")
-	}
-
-	if downloader.Breakpoint {
-		request.BreakpointFilePath = fmt.Sprintf("%s.bp", request.FilePath)
+	if downloader.Breakpoint && request.breakpointFilePath != "" {
+		request.breakpointFilePath = fmt.Sprintf("%s.download.bp", request.FilePath)
 	}
 
 	var parts []part
@@ -214,7 +86,7 @@ func (downloader *Downloader) Download(request *DownloadRequest) error {
 	}
 
 	if len(ranges) > 1 {
-		return fmt.Errorf("fds: does not support (bytes=i-j,m-n) format, only support (bytes=i-j)")
+		return ErrorRnageFormat
 	}
 
 	start := ranges[0].Start
@@ -233,7 +105,7 @@ func (downloader *Downloader) Download(request *DownloadRequest) error {
 	}
 	if downloader.Breakpoint {
 		// load breakpoint info
-		err = bp.Load(request.BreakpointFilePath)
+		err = bp.Load(request.breakpointFilePath)
 		if err != nil {
 			bp.Destroy()
 		}
@@ -243,7 +115,7 @@ func (downloader *Downloader) Download(request *DownloadRequest) error {
 		if err != nil {
 			downloader.logger.Warn(err)
 			downloader.logger.Warn("breakpoint info is invalid")
-			bp.Initilize(downloader, request.BucketName, request.ObjectName, request.BreakpointFilePath, r, metadata)
+			bp.Initilize(downloader, request.BucketName, request.ObjectName, request.breakpointFilePath, r, metadata)
 			bp.Destroy()
 		}
 
@@ -284,7 +156,7 @@ func (downloader *Downloader) Download(request *DownloadRequest) error {
 	}
 
 	if downloader.Breakpoint {
-		os.Remove(request.BreakpointFilePath)
+		os.Remove(request.breakpointFilePath)
 	}
 	return os.Rename(tmpFilePath, request.FilePath)
 }
@@ -374,4 +246,138 @@ func getEnd(begin int64, total int64, per int64) int64 {
 		return total - 1
 	}
 	return begin + per - 1
+}
+
+type breakpointInfo struct {
+	FilePath   string
+	BucketName string
+	ObjectName string
+	ObjectStat objectStat
+	Parts      []part
+	PartStat   []bool
+	Start      int64
+	End        int64
+	MD5        string
+
+	downloader *Downloader
+}
+
+type objectStat struct {
+	Size         int64  // Object size
+	LastModified string // Last modified time
+}
+
+func (bp *breakpointInfo) Load(path string) error {
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(data, bp)
+}
+
+func (bp *breakpointInfo) Dump() error {
+	bpi := *bp
+
+	bpi.MD5 = ""
+	data, err := json.Marshal(bpi)
+	if err != nil {
+		return err
+	}
+
+	sum := md5.Sum(data)
+	b64 := base64.StdEncoding.EncodeToString(sum[:])
+	bpi.MD5 = b64
+
+	data, err = json.Marshal(bpi)
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(bpi.FilePath, data, os.FileMode(0664))
+}
+
+func (bp *breakpointInfo) Validate(bucketName, objectName string, r httpparser.HTTPRange) error {
+	if bucketName != bp.BucketName || objectName != bp.ObjectName {
+		return ErrorBucketOrObjectNotMatching
+	}
+
+	bpi := *bp
+	bpi.MD5 = ""
+	data, err := json.Marshal(bpi)
+	if err != nil {
+		return err
+	}
+	sum := md5.Sum(data)
+	b64 := base64.StdEncoding.EncodeToString(sum[:])
+	if b64 != bp.MD5 {
+		return ErrorMD5NotMatching
+	}
+
+	c := bp.downloader.client
+	metadata, err := c.GetObjectMetadata(bucketName, objectName)
+	if err != nil {
+		return err
+	}
+
+	length, err := metadata.GetContentLength()
+	if err != nil {
+		return err
+	}
+	if bp.ObjectStat.Size != length || bp.ObjectStat.LastModified != metadata.Get(fds.HTTPHeaderLastModified) {
+		return ErrorObjectStateNotMatching
+	}
+
+	if bp.Start != r.Start || bp.End != r.End {
+		return ErrorRangeNotMatching
+	}
+
+	return nil
+}
+
+func (bp *breakpointInfo) UnfinishParts() []part {
+	var result []part
+
+	for i, s := range bp.PartStat {
+		if !s {
+			result = append(result, bp.Parts[i])
+		}
+	}
+
+	return result
+}
+
+func (bp *breakpointInfo) Initilize(downloader *Downloader,
+	bucketName, objectName, filePath string, r httpparser.HTTPRange, md *fds.ObjectMetadata) error {
+	bp.MD5 = ""
+	bp.BucketName = bucketName
+	bp.ObjectName = objectName
+	bp.FilePath = filePath
+	bp.Start = r.Start
+	bp.End = r.End
+	bp.downloader = downloader
+
+	contentLength, err := md.GetContentLength()
+	if err != nil {
+		return err
+	}
+
+	parts, err := downloader.splitDownloadParts(contentLength, r)
+	if err != nil {
+		return err
+	}
+	bp.Parts = parts
+
+	bp.PartStat = make([]bool, len(bp.Parts))
+
+	bp.ObjectStat = objectStat{
+		Size:         contentLength,
+		LastModified: md.Get(fds.HTTPHeaderLastModified),
+	}
+
+	return nil
+}
+
+func (bp *breakpointInfo) Destroy() {
+	os.Remove(bp.FilePath)
 }

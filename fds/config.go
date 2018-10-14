@@ -2,7 +2,6 @@ package fds
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 	"time"
 )
@@ -51,7 +50,7 @@ func NewClientConfiguration(endpoint string) (*ClientConfiguration, error) {
 	} else if strings.HasSuffix(host, URLComSuffix) {
 		urlSuffix = URLComSuffix
 	} else {
-		return conf, fmt.Errorf("[client] error endpoint")
+		return conf, ErrorEndpoint
 	}
 	conf.regionName = host[0 : len(host)-len(urlSuffix)]
 

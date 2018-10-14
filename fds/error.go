@@ -1,9 +1,15 @@
 package fds
 
 import (
+	"errors"
 	"fmt"
 	"runtime"
 	"time"
+)
+
+// Errors
+var (
+	ErrorEndpoint = errors.New("Wrong endpoint")
 )
 
 // ServerError is a common structure for FDS client error
