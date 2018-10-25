@@ -1,5 +1,5 @@
 /*
-galaxy-fds-sdk-go是小米云对象存储服务FDS的go语言客户端。
+Package fds 是小米云对象存储服务FDS的go语言客户端。
 
 sdk通过封装原始的JSON Restful API，来实现方便地调用。
 
