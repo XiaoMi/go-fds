@@ -2,6 +2,7 @@ package fds
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -31,6 +32,11 @@ func (client *Client) CreateBucket(request *CreateBucketRequest) error {
 	return err
 }
 
+// CreateBucketWithContext creates new bucket with context controlling
+func (client *Client) CreateBucketWithContext(ctx *context.Context, request *CreateBucketRequest) error {
+	return nil
+}
+
 // DoesBucketExist judge whether a bucket exist
 func (client *Client) DoesBucketExist(bucketName string) (bool, error) {
 
@@ -49,6 +55,11 @@ func (client *Client) DoesBucketExist(bucketName string) (bool, error) {
 		return true, nil
 	}
 
+	return false, nil
+}
+
+// DoesBucketExits judge whether bucket exitst with context controlling
+func (client *Client) DoesBucketExits(ctx *context.Context, bucketName string) (bool, error) {
 	return false, nil
 }
 
