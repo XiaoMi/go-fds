@@ -14,9 +14,6 @@
 # Intellij IDEA
 .idea/
 
-# Visual Studio Code
-.vscode/
-
 # bin
 galaxy-fds-sdk-go
 
