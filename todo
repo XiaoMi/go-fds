@@ -4,9 +4,10 @@ Main:
   ✔ Move dummy code into Client.do() @done(18-10-03 22:49)
   ✔ Comment @done(18-10-04 12:40)
   ✔ Concurrent download @done(18-10-13 01:25)
-  ☐ Concurrent upload
+  ✘ Concurrent upload @cancelled(18-11-28 23:02)
   ☐ Document in doc.go
   ☐ More elegent comments
+  ☐ Context support
   ✔ CI @done(18-10-13 01:25)
 
 Bucket API:
