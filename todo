@@ -5,9 +5,10 @@ Main:
   ✔ Comment @done(18-10-04 12:40)
   ✔ Concurrent download @done(18-10-13 01:25)
   ✘ Concurrent upload @cancelled(18-11-28 23:02)
-  ☐ Document in doc.go
+  ✔ Document in doc.go @done(18-12-01 19:06)
   ☐ More elegent comments
-  ☐ Context support
+  ✔ Context support @done(18-12-01 19:06)
+  ☐ Context support unit tests
   ✔ CI @done(18-10-13 01:25)
 
 Bucket API:

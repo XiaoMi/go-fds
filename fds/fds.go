@@ -2,6 +2,7 @@ package fds
 
 import (
 	"bytes"
+	"context"
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
@@ -53,7 +54,7 @@ type clientRequest struct {
 }
 
 // make request
-func (client *Client) do(request *clientRequest) (*http.Response, error) {
+func (client *Client) do(ctx context.Context, request *clientRequest) (*http.Response, error) {
 	// parse http url query string
 	queryString, e := httpparser.QueryString(request.QueryHeaderOptions)
 	if e != nil {
@@ -70,10 +71,10 @@ func (client *Client) do(request *clientRequest) (*http.Response, error) {
 		return nil, e
 	}
 
-	return client.doRequest(request.Method, u, header, request.Data, request.Result)
+	return client.doRequest(ctx, request.Method, u, header, request.Data, request.Result)
 }
 
-func (client *Client) doRequest(method HTTPMethod, url *url.URL, header http.Header,
+func (client *Client) doRequest(ctx context.Context, method HTTPMethod, url *url.URL, header http.Header,
 	data io.Reader, result interface{}) (*http.Response, error) {
 	methodString := strings.ToUpper(string(method))
 	req := &http.Request{
@@ -85,6 +86,9 @@ func (client *Client) doRequest(method HTTPMethod, url *url.URL, header http.Hea
 		Header:     make(http.Header),
 		Host:       url.Host,
 	}
+
+	// inject context
+	req = req.WithContext(ctx)
 
 	dataFile := client.doHandleRequestBody(req, data)
 	if dataFile != nil {
@@ -119,6 +123,11 @@ func (client *Client) doRequest(method HTTPMethod, url *url.URL, header http.Hea
 
 	response, err := client.httpClient.Do(req)
 	if err != nil {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
+		}
 		return nil, err
 	}
 

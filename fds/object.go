@@ -2,6 +2,7 @@ package fds
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -21,6 +22,11 @@ type GetObjectRequest struct {
 
 // GetObject will get full content of object
 func (client *Client) GetObject(request *GetObjectRequest) (io.ReadCloser, error) {
+	return client.GetObjectWithContext(context.Background(), request)
+}
+
+// GetObjectWithContext will get full content of object with context controlling
+func (client *Client) GetObjectWithContext(ctx context.Context, request *GetObjectRequest) (io.ReadCloser, error) {
 	req := &clientRequest{
 		BucketName:         request.BucketName,
 		ObjectName:         request.ObjectName,
@@ -28,7 +34,7 @@ func (client *Client) GetObject(request *GetObjectRequest) (io.ReadCloser, error
 		Method:             HTTPGet,
 	}
 
-	resp, err := client.do(req)
+	resp, err := client.do(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -62,8 +68,13 @@ type PutObjectResponse struct {
 	OutsideAccess     bool   `json:"outsideAccess"`
 }
 
-// PutObject will create a object
+// PutObject will create object
 func (client *Client) PutObject(request *PutObjectRequest) (*PutObjectResponse, error) {
+	return client.PutObjectWithContext(context.Background(), request)
+}
+
+// PutObjectWithContext will create object with context controlling
+func (client *Client) PutObjectWithContext(ctx context.Context, request *PutObjectRequest) (*PutObjectResponse, error) {
 	result := &PutObjectResponse{}
 	req := &clientRequest{
 		BucketName:         request.BucketName,
@@ -74,7 +85,7 @@ func (client *Client) PutObject(request *PutObjectRequest) (*PutObjectResponse, 
 		Result:             result,
 	}
 
-	resp, err := client.do(req)
+	resp, err := client.do(ctx, req)
 	if err != nil {
 		return result, err
 	}
@@ -83,15 +94,20 @@ func (client *Client) PutObject(request *PutObjectRequest) (*PutObjectResponse, 
 	return result, nil
 }
 
-// DoesObjectExist judge wether a object exists
+// DoesObjectExist judge wether object exists
 func (client *Client) DoesObjectExist(bucketName, objectName string) (bool, error) {
+	return client.DoesObjectExistWithContext(context.Background(), bucketName, objectName)
+}
+
+// DoesObjectExistWithContext judge wether object exists with context controlling
+func (client *Client) DoesObjectExistWithContext(ctx context.Context, bucketName, objectName string) (bool, error) {
 	req := &clientRequest{
 		BucketName: bucketName,
 		ObjectName: objectName,
 		Method:     HTTPHead,
 	}
 
-	resp, err := client.do(req)
+	resp, err := client.do(ctx, req)
 	if err != nil {
 		return false, err
 	}
@@ -118,6 +134,11 @@ type CopyObjectRequest struct {
 
 // CopyObject copy object from a bucket to other bucket
 func (client *Client) CopyObject(request *CopyObjectRequest) error {
+	return client.CopyObjectWithContext(context.Background(), request)
+}
+
+// CopyObjectWithContext copy object from a bucket to other bucket with context controlling
+func (client *Client) CopyObjectWithContext(ctx context.Context, request *CopyObjectRequest) error {
 	dataString := map[string]string{
 		"srcBucketName": request.SourceBucketName,
 		"srcObjectName": request.SourceObjectName,
@@ -136,7 +157,7 @@ func (client *Client) CopyObject(request *CopyObjectRequest) error {
 		Data:               bytes.NewReader(data),
 	}
 
-	resp, err := client.do(req)
+	resp, err := client.do(ctx, req)
 	defer resp.Body.Close()
 
 	return err
@@ -148,6 +169,11 @@ type renameObjectOption struct {
 
 // RenameObject renames sourceObjectName in bucketName to targetObjectName
 func (client *Client) RenameObject(bucketName, sourceObjectName, targetObjectName string) error {
+	return client.RenameObjectWithContext(context.Background(), bucketName, sourceObjectName, targetObjectName)
+}
+
+// RenameObjectWithContext renames sourceObjectName in bucketName to targetObjectName with context controlling
+func (client *Client) RenameObjectWithContext(ctx context.Context, bucketName, sourceObjectName, targetObjectName string) error {
 	req := &clientRequest{
 		BucketName:         bucketName,
 		ObjectName:         sourceObjectName,
@@ -155,7 +181,7 @@ func (client *Client) RenameObject(bucketName, sourceObjectName, targetObjectNam
 		Method:             HTTPPut,
 	}
 
-	resp, err := client.do(req)
+	resp, err := client.do(ctx, req)
 	defer resp.Body.Close()
 
 	return err
@@ -163,13 +189,18 @@ func (client *Client) RenameObject(bucketName, sourceObjectName, targetObjectNam
 
 // DeleteObject deletes objectName in bucketName
 func (client *Client) DeleteObject(bucketName, objectName string) error {
+	return client.DeleteObjectWithContext(context.Background(), bucketName, objectName)
+}
+
+// DeleteObjectWithContext deletes object in bucket with context controlling
+func (client *Client) DeleteObjectWithContext(ctx context.Context, bucketName, objectName string) error {
 	req := &clientRequest{
 		BucketName: bucketName,
 		ObjectName: objectName,
 		Method:     HTTPDelete,
 	}
 
-	resp, err := client.do(req)
+	resp, err := client.do(ctx, req)
 	defer resp.Body.Close()
 
 	return err
@@ -182,6 +213,11 @@ type deleteObjectsOption struct {
 
 // DeleteObjects will delete all objects in objectNames
 func (client *Client) DeleteObjects(bucketName string, objectNames []string, put2trash bool) error {
+	return client.DeleteObjectsWithContext(context.Background(), bucketName, objectNames, put2trash)
+}
+
+// DeleteObjectsWithContext will delete all objects in bucket with context controlling
+func (client *Client) DeleteObjectsWithContext(ctx context.Context, bucketName string, objectNames []string, put2trash bool) error {
 	data, err := json.Marshal(objectNames)
 	if err != nil {
 		return err
@@ -194,7 +230,7 @@ func (client *Client) DeleteObjects(bucketName string, objectNames []string, put
 		Data:               bytes.NewReader(data),
 	}
 
-	resp, err := client.do(req)
+	resp, err := client.do(ctx, req)
 	defer resp.Body.Close()
 
 	return err
@@ -202,6 +238,11 @@ func (client *Client) DeleteObjects(bucketName string, objectNames []string, put
 
 // DeleteObjectsWithPrefix will delete all objects with prefix of prefix
 func (client *Client) DeleteObjectsWithPrefix(bucketName, prefix string, put2stash bool) error {
+	return client.DeleteObjectsWithPrefixWithContext(context.Background(), bucketName, prefix, put2stash)
+}
+
+// DeleteObjectsWithPrefixWithContext will delete all objects with prefix of prefix with context controlling
+func (client *Client) DeleteObjectsWithPrefixWithContext(ctx context.Context, bucketName, prefix string, put2stash bool) error {
 	listObjectsRequest := &ListObjectsRequest{
 		BucketName: bucketName,
 		Prefix:     prefix,
@@ -209,7 +250,7 @@ func (client *Client) DeleteObjectsWithPrefix(bucketName, prefix string, put2sta
 		MaxKeys:    DefaultListObjectsMaxKeys,
 	}
 
-	objectListing, err := client.ListObjects(listObjectsRequest)
+	objectListing, err := client.ListObjectsWithContext(ctx, listObjectsRequest)
 	if err != nil {
 		return err
 	}
@@ -220,7 +261,7 @@ func (client *Client) DeleteObjectsWithPrefix(bucketName, prefix string, put2sta
 			names = append(names, o.ObjectName)
 		}
 
-		err = client.DeleteObjects(bucketName, names, put2stash)
+		err = client.DeleteObjectsWithContext(ctx, bucketName, names, put2stash)
 		if err != nil {
 			return err
 		}
@@ -229,7 +270,7 @@ func (client *Client) DeleteObjectsWithPrefix(bucketName, prefix string, put2sta
 			break
 		}
 
-		objectListing, err = client.ListObjectsNextBatch(objectListing)
+		objectListing, err = client.ListObjectsNextBatchWithContext(ctx, objectListing)
 		if err != nil {
 			return err
 		}
@@ -290,6 +331,11 @@ type getObjectMetadataOption struct {
 
 // GetObjectMetadata gets metadata of objectName in bucketName
 func (client *Client) GetObjectMetadata(bucketName, objectName string) (*ObjectMetadata, error) {
+	return client.GetObjectMetadataWithContext(context.Background(), bucketName, objectName)
+}
+
+// GetObjectMetadataWithContext gets metadata of objectName in bucketName with context controlling
+func (client *Client) GetObjectMetadataWithContext(ctx context.Context, bucketName, objectName string) (*ObjectMetadata, error) {
 	result := &ObjectMetadata{}
 	req := &clientRequest{
 		BucketName:         bucketName,
@@ -298,7 +344,7 @@ func (client *Client) GetObjectMetadata(bucketName, objectName string) (*ObjectM
 		QueryHeaderOptions: getObjectMetadataOption{},
 	}
 
-	resp, err := client.do(req)
+	resp, err := client.do(ctx, req)
 	if err != nil {
 		return result, err
 	}
@@ -322,6 +368,11 @@ type SetObjectMetadataRequest struct {
 
 // SetObjectMetadata sets metadata of object
 func (client *Client) SetObjectMetadata(request *SetObjectMetadataRequest) error {
+	return client.SetObjectMetadataWithContext(context.Background(), request)
+}
+
+// SetObjectMetadataWithContext sets metadata of object with context controlling
+func (client *Client) SetObjectMetadataWithContext(ctx context.Context, request *SetObjectMetadataRequest) error {
 	data, e := request.Metadata.serialize()
 	if e != nil {
 		return e
@@ -335,7 +386,7 @@ func (client *Client) SetObjectMetadata(request *SetObjectMetadataRequest) error
 		Data:               bytes.NewReader(data),
 	}
 
-	resp, err := client.do(req)
+	resp, err := client.do(ctx, req)
 	defer resp.Body.Close()
 
 	return err
@@ -374,6 +425,11 @@ type ObjectListing struct {
 
 // ListObjects list all objects with Prefix and Delimiter
 func (client *Client) ListObjects(request *ListObjectsRequest) (*ObjectListing, error) {
+	return client.ListObjectsWithContext(context.Background(), request)
+}
+
+// ListObjectsWithContext list all objects with Prefix and Delimiter with context controlling
+func (client *Client) ListObjectsWithContext(ctx context.Context, request *ListObjectsRequest) (*ObjectListing, error) {
 	result := &ObjectListing{}
 	req := &clientRequest{
 		BucketName:         request.BucketName,
@@ -382,7 +438,7 @@ func (client *Client) ListObjects(request *ListObjectsRequest) (*ObjectListing, 
 		Result:             result,
 	}
 
-	resp, err := client.do(req)
+	resp, err := client.do(ctx, req)
 	defer resp.Body.Close()
 
 	return result, err
@@ -390,6 +446,11 @@ func (client *Client) ListObjects(request *ListObjectsRequest) (*ObjectListing, 
 
 // ListObjectsNextBatch list next batch of ListObjects
 func (client *Client) ListObjectsNextBatch(previous *ObjectListing) (*ObjectListing, error) {
+	return client.ListObjectsNextBatchWithContext(context.Background(), previous)
+}
+
+// ListObjectsNextBatchWithContext list next batch of ListObjects with context controlling
+func (client *Client) ListObjectsNextBatchWithContext(ctx context.Context, previous *ObjectListing) (*ObjectListing, error) {
 	result := &ObjectListing{}
 	req := &clientRequest{
 		BucketName:         previous.BucketName,
@@ -398,7 +459,7 @@ func (client *Client) ListObjectsNextBatch(previous *ObjectListing) (*ObjectList
 		Result:             result,
 	}
 
-	resp, err := client.do(req)
+	resp, err := client.do(ctx, req)
 	defer resp.Body.Close()
 
 	return result, err
@@ -432,6 +493,11 @@ type InitMultipartUploadResponse struct {
 
 // InitMultipartUpload starts a progress of multipart uploading
 func (client *Client) InitMultipartUpload(request *InitMultipartUploadRequest) (*InitMultipartUploadResponse, error) {
+	return client.InitMultipartUploadWithContext(context.Background(), request)
+}
+
+// InitMultipartUploadWithContext starts a progress of multipart uploading with context controlling
+func (client *Client) InitMultipartUploadWithContext(ctx context.Context, request *InitMultipartUploadRequest) (*InitMultipartUploadResponse, error) {
 	result := &InitMultipartUploadResponse{}
 	req := &clientRequest{
 		BucketName:         request.BucketName,
@@ -441,7 +507,7 @@ func (client *Client) InitMultipartUpload(request *InitMultipartUploadRequest) (
 		Result:             result,
 	}
 
-	resp, err := client.do(req)
+	resp, err := client.do(ctx, req)
 	defer resp.Body.Close()
 
 	return result, err
@@ -465,6 +531,11 @@ type UploadPartResponse struct {
 
 // UploadPart upload part of multipart uploading
 func (client *Client) UploadPart(request *UploadPartRequest) (*UploadPartResponse, error) {
+	return client.UploadPartWithContext(context.Background(), request)
+}
+
+// UploadPartWithContext upload part of multipart uploading with context controlling
+func (client *Client) UploadPartWithContext(ctx context.Context, request *UploadPartRequest) (*UploadPartResponse, error) {
 	result := &UploadPartResponse{}
 	req := &clientRequest{
 		BucketName:         request.BucketName,
@@ -475,7 +546,7 @@ func (client *Client) UploadPart(request *UploadPartRequest) (*UploadPartRespons
 		Result:             result,
 	}
 
-	resp, err := client.do(req)
+	resp, err := client.do(ctx, req)
 	defer resp.Body.Close()
 
 	return result, err
@@ -488,6 +559,11 @@ type UploadPartList struct {
 
 // CompleteMultipartUpload completes the progress of multipart uploading
 func (client *Client) CompleteMultipartUpload(request *InitMultipartUploadResponse, list *UploadPartList) (*PutObjectResponse, error) {
+	return client.CompleteMultipartUploadWithContext(context.Background(), request, list)
+}
+
+// CompleteMultipartUploadWithContext completes the progress of multipart uploading with context controlling
+func (client *Client) CompleteMultipartUploadWithContext(ctx context.Context, request *InitMultipartUploadResponse, list *UploadPartList) (*PutObjectResponse, error) {
 	result := &PutObjectResponse{}
 	data, e := json.Marshal(*list)
 	if e != nil {
@@ -503,7 +579,7 @@ func (client *Client) CompleteMultipartUpload(request *InitMultipartUploadRespon
 		Result:             result,
 	}
 
-	resp, err := client.do(req)
+	resp, err := client.do(ctx, req)
 	defer resp.Body.Close()
 
 	return result, err
@@ -511,6 +587,11 @@ func (client *Client) CompleteMultipartUpload(request *InitMultipartUploadRespon
 
 // AbortMultipartUpload aborts the progress of multipart uploading
 func (client *Client) AbortMultipartUpload(request *InitMultipartUploadResponse) error {
+	return client.AbortMultipartUploadWithContext(context.Background(), request)
+}
+
+// AbortMultipartUploadWithContext aborts the progress of multipart uploading with context controlling
+func (client *Client) AbortMultipartUploadWithContext(ctx context.Context, request *InitMultipartUploadResponse) error {
 	req := &clientRequest{
 		BucketName:         request.BucketName,
 		ObjectName:         request.ObjectName,
@@ -518,7 +599,7 @@ func (client *Client) AbortMultipartUpload(request *InitMultipartUploadResponse)
 		QueryHeaderOptions: request,
 	}
 
-	resp, err := client.do(req)
+	resp, err := client.do(ctx, req)
 	defer resp.Body.Close()
 
 	return err
@@ -530,6 +611,11 @@ type restoreObjectOption struct {
 
 // RestoreObject restore object which is deleted if this object is avaliable
 func (client *Client) RestoreObject(bucketName, objectName string) error {
+	return client.RestoreObjectWithContext(context.Background(), bucketName, objectName)
+}
+
+// RestoreObjectWithContext restore object which is deleted if this object is avaliable with context controlling
+func (client *Client) RestoreObjectWithContext(ctx context.Context, bucketName, objectName string) error {
 	req := &clientRequest{
 		BucketName:         bucketName,
 		ObjectName:         objectName,
@@ -537,7 +623,7 @@ func (client *Client) RestoreObject(bucketName, objectName string) error {
 		QueryHeaderOptions: restoreObjectOption{},
 	}
 
-	resp, err := client.do(req)
+	resp, err := client.do(ctx, req)
 	defer resp.Body.Close()
 
 	return err
@@ -589,6 +675,11 @@ type GetObjectACLRequest struct {
 
 // GetObjectACL will return AccessControlList of object
 func (client *Client) GetObjectACL(request *GetObjectACLRequest) (*AccessControlList, error) {
+	return client.GetObjectACLWithContext(context.Background(), request)
+}
+
+// GetObjectACLWithContext will return AccessControlList of object with context controlling
+func (client *Client) GetObjectACLWithContext(ctx context.Context, request *GetObjectACLRequest) (*AccessControlList, error) {
 	result := &AccessControlList{}
 	req := &clientRequest{
 		BucketName:         request.BucketName,
@@ -598,7 +689,7 @@ func (client *Client) GetObjectACL(request *GetObjectACLRequest) (*AccessControl
 		Result:             result,
 	}
 
-	resp, err := client.do(req)
+	resp, err := client.do(ctx, req)
 	defer resp.Body.Close()
 
 	return result, err
@@ -615,6 +706,11 @@ type SetObjectACLRequest struct {
 
 // SetObjectACL sets AccessControlList for object
 func (client *Client) SetObjectACL(request *SetObjectACLRequest) error {
+	return client.SetObjectACLWithContext(context.Background(), request)
+}
+
+// SetObjectACLWithContext sets AccessControlList for object with context controlling
+func (client *Client) SetObjectACLWithContext(ctx context.Context, request *SetObjectACLRequest) error {
 	aclBytes, e := json.Marshal(request.ACL)
 	if e != nil {
 		return errors.New("fds client: can't marshal acl")
@@ -628,15 +724,19 @@ func (client *Client) SetObjectACL(request *SetObjectACLRequest) error {
 		Data:               bytes.NewReader(aclBytes),
 	}
 
-	resp, err := client.do(req)
+	resp, err := client.do(ctx, req)
 	defer resp.Body.Close()
 
 	return err
-
 }
 
 // SetObjectPublic is a shortcut of setting object public
 func (client *Client) SetObjectPublic(bucketName, objectName string) error {
+	return client.SetObjectPublicWithContext(context.Background(), bucketName, objectName)
+}
+
+// SetObjectPublicWithContext is a shortcut of setting object public with context controlling
+func (client *Client) SetObjectPublicWithContext(ctx context.Context, bucketName, objectName string) error {
 	grant := Grant{
 		Grantee: GrantKey{
 			ID: "ALL_USERS",
@@ -654,5 +754,5 @@ func (client *Client) SetObjectPublic(bucketName, objectName string) error {
 		ACL:        controlList,
 	}
 
-	return client.SetObjectACL(aclRequest)
+	return client.SetObjectACLWithContext(ctx, aclRequest)
 }

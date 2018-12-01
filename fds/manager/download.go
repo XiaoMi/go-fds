@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"context"
 	"crypto/md5"
 	"encoding/base64"
 	"encoding/json"
@@ -59,6 +60,11 @@ type DownloadRequest struct {
 
 // Download performs the downloading action
 func (downloader *Downloader) Download(request *DownloadRequest) error {
+	return downloader.DownloadWithContext(context.Background(), request)
+}
+
+// DownloadWithContext performs the downloading action with context controlling
+func (downloader *Downloader) DownloadWithContext(ctx context.Context, request *DownloadRequest) error {
 	if downloader.Breakpoint && request.breakpointFilePath != "" {
 		request.breakpointFilePath = fmt.Sprintf("%s.download.bp", request.FilePath)
 	}
@@ -66,7 +72,7 @@ func (downloader *Downloader) Download(request *DownloadRequest) error {
 	var parts []part
 	var err error
 
-	metadata, err := downloader.client.GetObjectMetadata(request.BucketName, request.ObjectName)
+	metadata, err := downloader.client.GetObjectMetadataWithContext(ctx, request.BucketName, request.ObjectName)
 	if err != nil {
 		return err
 	}
@@ -135,7 +141,7 @@ func (downloader *Downloader) Download(request *DownloadRequest) error {
 
 	tmpFilePath := request.FilePath + ".tmp"
 	for i := 1; i < downloader.Concurrency; i++ {
-		go downloader.downloaderTaskConsumer(i, request, tmpFilePath, jobs, results, failed, finished)
+		go downloader.downloaderTaskConsumer(ctx, i, request, tmpFilePath, jobs, results, failed, finished)
 	}
 
 	go downloader.downloaderTaskProducer(jobs, parts)
@@ -161,7 +167,7 @@ func (downloader *Downloader) Download(request *DownloadRequest) error {
 	return os.Rename(tmpFilePath, request.FilePath)
 }
 
-func (downloader *Downloader) downloaderTaskConsumer(id int,
+func (downloader *Downloader) downloaderTaskConsumer(ctx context.Context, id int,
 	request *DownloadRequest, tmpFilePath string, jobs <-chan part, results chan<- part, failed chan<- error, finished <-chan bool) {
 	for p := range jobs {
 		req := &fds.GetObjectRequest{
@@ -170,7 +176,7 @@ func (downloader *Downloader) downloaderTaskConsumer(id int,
 			Range:      fmt.Sprintf("bytes=%v-%v", p.Start, p.End),
 		}
 
-		data, err := downloader.client.GetObject(req)
+		data, err := downloader.client.GetObjectWithContext(ctx, req)
 		if err != nil {
 			downloader.logger.Debug(err.Error())
 			failed <- err
