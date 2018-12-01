@@ -21,12 +21,12 @@ import (
 
 // Client supplies an interface for interaction with FDS
 type Client struct {
-	logger *logrus.Logger
+	logger     *logrus.Logger
+	httpClient *http.Client
 
 	Configuration *ClientConfiguration
 	AccessID      string
 	AccessSecret  string
-	httpClient    *http.Client
 }
 
 // New a FDSClient

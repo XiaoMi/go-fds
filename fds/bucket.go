@@ -58,8 +58,8 @@ func (client *Client) DoesBucketExist(bucketName string) (bool, error) {
 	return false, nil
 }
 
-// DoesBucketExits judge whether bucket exitst with context controlling
-func (client *Client) DoesBucketExits(ctx *context.Context, bucketName string) (bool, error) {
+// DoesBucketExitsWithContext judge whether bucket exitst with context controlling
+func (client *Client) DoesBucketExitsWithContext(ctx *context.Context, bucketName string) (bool, error) {
 	return false, nil
 }
 
