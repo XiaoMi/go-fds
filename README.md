@@ -8,6 +8,8 @@ FDS Go SDK.
 
 So, I start up this project for a good sdk design. 
 
+:sparkles: :sparkles: :sparkles: **We got context support working, which make your concurrent program more fluent**
+
 ## Install
 `go get -u github.com/hujianxin/galaxy-fds-sdk-go`
 
