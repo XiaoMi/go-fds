@@ -461,7 +461,7 @@ func (suite *GalaxyFDSTestSuite) TestMultipartUpload() {
 			ObjectName: testObjectName,
 			UploadID:   initMultipartUploadResponse.UploadID,
 			PartNumber: i,
-			Data:       bytes.NewReader(make([]byte, 39498485)),
+			Data:       bytes.NewReader(make([]byte, 8498485)),
 		}
 		uploadResponse, e := suite.client.UploadPart(uploadPartRequest)
 		suite.Nil(e)
