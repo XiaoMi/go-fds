@@ -47,10 +47,7 @@ func main() {
 }
 ```
 
-For more sample, please look into `fds/fds_test.go` file.
+For more sample, please look into `example` package
 
 ## Development
 To develop galaxy-fds-sdk-go, you'd better to upgrade your go version to 1.11+，because there is a `go modules` concept from go1.11, which can make it convenient.
-
-## License
-MIT
