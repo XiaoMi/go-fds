@@ -158,9 +158,12 @@ func (client *Client) CopyObjectWithContext(ctx context.Context, request *CopyOb
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return err
+	}
 	defer resp.Body.Close()
 
-	return err
+	return nil
 }
 
 type renameObjectOption struct {
@@ -182,9 +185,12 @@ func (client *Client) RenameObjectWithContext(ctx context.Context, bucketName, s
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return err
+	}
 	defer resp.Body.Close()
 
-	return err
+	return nil
 }
 
 // DeleteObject deletes objectName in bucketName
@@ -201,9 +207,12 @@ func (client *Client) DeleteObjectWithContext(ctx context.Context, bucketName, o
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return err
+	}
 	defer resp.Body.Close()
 
-	return err
+	return nil
 }
 
 type deleteObjectsOption struct {
@@ -231,9 +240,12 @@ func (client *Client) DeleteObjectsWithContext(ctx context.Context, bucketName s
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return err
+	}
 	defer resp.Body.Close()
 
-	return err
+	return nil
 }
 
 // DeleteObjectsWithPrefix will delete all objects with prefix of prefix
@@ -387,6 +399,9 @@ func (client *Client) SetObjectMetadataWithContext(ctx context.Context, request 
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return err
+	}
 	defer resp.Body.Close()
 
 	return err
@@ -439,6 +454,9 @@ func (client *Client) ListObjectsWithContext(ctx context.Context, request *ListO
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	return result, err
@@ -460,6 +478,9 @@ func (client *Client) ListObjectsNextBatchWithContext(ctx context.Context, previ
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	return result, err
@@ -508,6 +529,9 @@ func (client *Client) InitMultipartUploadWithContext(ctx context.Context, reques
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	return result, err
@@ -547,6 +571,9 @@ func (client *Client) UploadPartWithContext(ctx context.Context, request *Upload
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	return result, err
@@ -580,6 +607,9 @@ func (client *Client) CompleteMultipartUploadWithContext(ctx context.Context, re
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	return result, err
@@ -600,6 +630,9 @@ func (client *Client) AbortMultipartUploadWithContext(ctx context.Context, reque
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return err
+	}
 	defer resp.Body.Close()
 
 	return err
@@ -624,6 +657,9 @@ func (client *Client) RestoreObjectWithContext(ctx context.Context, bucketName, 
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return err
+	}
 	defer resp.Body.Close()
 
 	return err
@@ -690,6 +726,9 @@ func (client *Client) GetObjectACLWithContext(ctx context.Context, request *GetO
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	return result, err
@@ -725,6 +764,9 @@ func (client *Client) SetObjectACLWithContext(ctx context.Context, request *SetO
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return err
+	}
 	defer resp.Body.Close()
 
 	return err

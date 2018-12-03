@@ -32,6 +32,9 @@ func (client *Client) CreateBucketWithContext(ctx context.Context, request *Crea
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return err
+	}
 	defer resp.Body.Close()
 
 	return err
@@ -75,6 +78,9 @@ func (client *Client) DeleteBucketWithContext(ctx context.Context, bucketName st
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return err
+	}
 	defer resp.Body.Close()
 
 	return err
@@ -104,6 +110,9 @@ func (client *Client) GetBucketInfoWithContext(ctx context.Context, bucketName s
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	return result, err
@@ -135,6 +144,9 @@ func (client *Client) ListBucketsWithContext(ctx context.Context) (*ListBucketsR
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	return result, err
@@ -159,6 +171,9 @@ func (client *Client) ListAuthorizedBucketsWithContext(ctx context.Context) (*Li
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	return result, err
@@ -193,6 +208,9 @@ func (client *Client) MigrateBucketWithContext(ctx context.Context, request *Mig
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return err
+	}
 	defer resp.Body.Close()
 	return err
 }
@@ -213,6 +231,9 @@ func (client *Client) GetBucketACLWithContext(ctx context.Context, bucketName st
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	return result, err
@@ -238,23 +259,89 @@ func (client *Client) SetBucketACLWithContext(ctx context.Context, bucketName st
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return err
+	}
 	defer resp.Body.Close()
 
 	return err
 }
 
+// LifecycleBaseItem replaces days in action
+type LifecycleBaseItem struct {
+	Days float64 `json:"days"`
+}
+
+// LifecycleActionType is enum type of action
+type LifecycleActionType string
+
+// Three LifecycleAction Types
+const (
+	Expiration                     LifecycleActionType = "expiration"
+	NonCurrentVersionExpiration    LifecycleActionType = "nonCurrentVersionExpiration"
+	AbortIncompleteMultipartUpload LifecycleActionType = "abortIncompleteMultipartUpload "
+)
+
+// LifecycleAction is action in LifecycleRule
+type LifecycleAction map[LifecycleActionType]LifecycleBaseItem
+
+// LifecycleRule is rule of LifecycleConfig
+type LifecycleRule struct {
+	ID      string          `json:"id"`
+	Prefix  string          `json:"prefix"`
+	Enabled bool            `json:"enabled"`
+	Action  LifecycleAction `json:"actions"`
+}
+
+// NewLifecycleRuleFromJSON is a shortcut for translating json string to LifecycleRule.
+// Becuase, constructing a LifecycleRule is too hard
+func NewLifecycleRuleFromJSON(content []byte) (*LifecycleRule, error) {
+	result := &LifecycleRule{}
+	err := json.Unmarshal(content, result)
+	return result, err
+}
+
 // LifecycleConfig is ttl config of bucket
 type LifecycleConfig struct {
+	Rules []LifecycleRule `json:"rules"`
+}
+
+// NewLifecycleConfigFromJSON is a shortcut for translating json string to LifecycleConfig.
+// Becuase, constructing a LifecycleConfig is too hard
+func NewLifecycleConfigFromJSON(content []byte) (*LifecycleConfig, error) {
+	result := &LifecycleConfig{}
+	err := json.Unmarshal(content, result)
+	return result, err
 }
 
 // GetLifecycleConfig returns LifecycleConfig of bucket
-func (client *Client) GetLifecycleConfig(bucketName string) (*LifecycleConfig, error) {
-	return client.GetLifecycleConfigWithContext(context.Background(), bucketName)
+func (client *Client) GetLifecycleConfig(request *GetLifecycleConfigRequest) (*LifecycleConfig, error) {
+	return client.GetLifecycleConfigWithContext(context.Background(), request)
+}
+
+// GetLifecycleConfigRequest is request for getting lifecycle config
+type GetLifecycleConfigRequest struct {
+	BucketName string `param:"-" header:"-"`
+	RuleID     string `param:"lifecycle" header:"-"`
 }
 
 // GetLifecycleConfigWithContext returns LifecycleConfig of bucket with context controlling
-func (client *Client) GetLifecycleConfigWithContext(ctx context.Context, bucketName string) (*LifecycleConfig, error) {
-	return &LifecycleConfig{}, nil
+func (client *Client) GetLifecycleConfigWithContext(ctx context.Context, request *GetLifecycleConfigRequest) (*LifecycleConfig, error) {
+	result := &LifecycleConfig{}
+	req := &clientRequest{
+		BucketName:         request.BucketName,
+		Method:             HTTPGet,
+		QueryHeaderOptions: request,
+		Result:             result,
+	}
+
+	resp, err := client.do(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	return result, err
 }
 
 // SetLifecycleConfig sets LifecycleConfig of bucket
@@ -262,8 +349,58 @@ func (client *Client) SetLifecycleConfig(bucketName string, config *LifecycleCon
 	return client.SetLifecycleConfigWithContext(context.Background(), bucketName, config)
 }
 
+type lifecycleOption struct {
+	Lifecycle string `param:"lifecycle" header:"-"`
+}
+
 // SetLifecycleConfigWithContext sets LifecycleConfig of bucket with context controlling
 func (client *Client) SetLifecycleConfigWithContext(ctx context.Context, bucketName string, config *LifecycleConfig) error {
+	data, err := json.Marshal(config)
+	if err != nil {
+		return err
+	}
+
+	req := &clientRequest{
+		BucketName:         bucketName,
+		Method:             HTTPPut,
+		QueryHeaderOptions: lifecycleOption{},
+		Data:               bytes.NewReader(data),
+	}
+
+	resp, err := client.do(ctx, req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	return err
+}
+
+// SetLifecycleRule sets LifecycleRule of bucket
+func (client *Client) SetLifecycleRule(bucketName string, rule *LifecycleRule) error {
+	return client.SetLifecycleRuleWithContext(context.Background(), bucketName, rule)
+}
+
+// SetLifecycleRuleWithContext sets LifecycleRule of bucket with context controlling
+func (client *Client) SetLifecycleRuleWithContext(ctx context.Context, bucketName string, rule *LifecycleRule) error {
+	data, err := json.Marshal(rule)
+	if err != nil {
+		return err
+	}
+
+	req := &clientRequest{
+		BucketName:         bucketName,
+		Method:             HTTPPut,
+		QueryHeaderOptions: lifecycleOption{"rule"},
+		Data:               bytes.NewReader(data),
+	}
+
+	resp, err := client.do(ctx, req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
 	return nil
 }
 
@@ -295,6 +432,9 @@ func (client *Client) GetAccessLogWithContext(ctx context.Context, bucketName st
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	return result, err
@@ -320,6 +460,9 @@ func (client *Client) SetAccessLogWithContext(ctx context.Context, bucketName st
 	}
 
 	resp, err := client.do(ctx, req)
+	if err != nil {
+		return err
+	}
 	defer resp.Body.Close()
 
 	return err

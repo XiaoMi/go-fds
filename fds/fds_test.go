@@ -215,7 +215,9 @@ func (suite *GalaxyFDSTestSuite) TestCopyObject() {
 
 	rc, e := suite.client.GetObject(getObjectRequest)
 	suite.Nil(e)
-	defer rc.Close()
+	if e == nil {
+		defer rc.Close()
+	}
 
 	b, e := ioutil.ReadAll(rc)
 	suite.Equal(string(b), testObjectContent)
