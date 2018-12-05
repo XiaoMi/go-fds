@@ -20,7 +20,7 @@ func main() {
 		BucketName: "cnbj1-nginx-log",
 		Prefix:     "2018/",
 		Delimiter:  "/",
-		MaxKeys:    1000,
+		MaxKeys:    10,
 	}
 
 	listing, err := fdsClient.ListObjects(request)
@@ -35,6 +35,7 @@ func main() {
 		}
 
 		listing, err = fdsClient.ListObjectsNextBatch(listing)
+		fmt.Println(listing.CommonPrefixes)
 		if err != nil {
 			log.Fatal(err)
 		}
