@@ -1,4 +1,4 @@
-module github.com/v2tool/galaxy-fds-sdk-go
+module github.com/hujianxin/go-fds
 
 require (
 	github.com/google/uuid v1.0.0

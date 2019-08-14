@@ -22,3 +22,5 @@ galaxy-fds-sdk-go
 
 cover.html
 cover.out
+
+vendor/
