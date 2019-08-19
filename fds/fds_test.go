@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/hujianxin/galaxy-fds-sdk-go/fds"
+	"github.com/hujianxin/go-fds/fds"
 	"github.com/stretchr/testify/suite"
 )
 

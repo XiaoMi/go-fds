@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/hujianxin/galaxy-fds-sdk-go/fds"
+	"github.com/hujianxin/go-fds/fds"
 )
 
 func main() {

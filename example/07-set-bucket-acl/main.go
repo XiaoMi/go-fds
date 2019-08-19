@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/hujianxin/galaxy-fds-sdk-go/fds"
+	"github.com/hujianxin/go-fds/fds"
 )
 
 func main() {

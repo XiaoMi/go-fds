@@ -16,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hujianxin/galaxy-fds-sdk-go/fds/httpparser"
+	"github.com/hujianxin/go-fds/fds/httpparser"
 	"github.com/sirupsen/logrus"
 )
 

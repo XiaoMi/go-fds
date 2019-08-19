@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hujianxin/galaxy-fds-sdk-go/fds/httpparser"
+	"github.com/hujianxin/go-fds/fds/httpparser"
 	"github.com/stretchr/testify/assert"
 )
 

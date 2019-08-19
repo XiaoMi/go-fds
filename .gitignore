@@ -15,7 +15,7 @@
 .idea/
 
 # bin
-galaxy-fds-sdk-go
+go-fds
 
 # env file for debug
 .env

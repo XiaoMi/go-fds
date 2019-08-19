@@ -1,17 +1,17 @@
-# galaxy-fds-sdk-go
+# go-fds
 FDS Go SDK.
 
-[![Build Status](https://travis-ci.org/hujianxin/galaxy-fds-sdk-go.svg?branch=master)](https://travis-ci.org/hujianxin/galaxy-fds-sdk-go)
-[![Go Report Card](https://goreportcard.com/badge/github.com/hujianxin/galaxy-fds-sdk-go)](https://goreportcard.com/report/github.com/hujianxin/galaxy-fds-sdk-go)
+[![Build Status](https://travis-ci.org/hujianxin/go-fds.svg?branch=master)](https://travis-ci.org/hujianxin/go-fds)
+[![Go Report Card](https://goreportcard.com/badge/github.com/hujianxin/go-fds)](https://goreportcard.com/report/github.com/hujianxin/go-fds)
 
-[The formal Go SDK of FDS](https://github.com/XiaoMi/galaxy-fds-sdk-golang) is not well designed, but constrained by the fixed interface, I can't reconstruct it in large scale.
+[The formal Go SDK of FDS](https://github.com/XiaoMi/go-fdslang) is not well designed, but constrained by the fixed interface, I can't reconstruct it in large scale.
 
 So, I start up this project for a good sdk design. 
 
 :sparkles: :sparkles: :sparkles: **We got context support working, which make your concurrent program more fluent**
 
 ## Install
-`go get -u github.com/hujianxin/galaxy-fds-sdk-go`
+`go get -u github.com/hujianxin/go-fds`
 
 ## Usage
 ```go
@@ -21,8 +21,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/hujianxin/galaxy-fds-sdk-go/fds"
-	"github.com/hujianxin/galaxy-fds-sdk-go/fds/manager"
+	"github.com/hujianxin/go-fds/fds"
+	"github.com/hujianxin/go-fds/fds/manager"
 )
 
 func main() {
@@ -50,4 +50,4 @@ func main() {
 For more sample, please look into `example` package
 
 ## Development
-To develop galaxy-fds-sdk-go, you'd better to upgrade your go version to 1.11+，because there is a `go modules` concept from go1.11, which can make it convenient.
+To develop go-fds, you'd better to upgrade your go version to 1.11+，because there is a `go modules` concept from go1.11, which can make it convenient.

@@ -1,4 +1,4 @@
-# galaxy-fds-sdk-go
+# go-fds
 小米文件存储FDS(File Storage Service) Go SDK.
 
 # 简介
@@ -14,7 +14,7 @@
 最后，auth.go里面的signature方法是直接使用了旧SDK中的代码。
 
 ## 安装
-`go get -u github.com/hujianxin/galaxy-fds-sdk-go`
+`go get -u github.com/hujianxin/go-fds`
 
 ## 用法
 ```go
@@ -24,8 +24,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/hujianxin/galaxy-fds-sdk-go/fds"
-	"github.com/hujianxin/galaxy-fds-sdk-go/fds/manager"
+	"github.com/hujianxin/go-fds/fds"
+	"github.com/hujianxin/go-fds/fds/manager"
 )
 
 func main() {
