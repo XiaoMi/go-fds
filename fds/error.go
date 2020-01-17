@@ -9,7 +9,7 @@ import (
 
 // Errors
 var (
-	ErrorEndpoint = errors.New("Wrong endpoint")
+	ErrorEndpoint = errors.New("wrong endpoint")
 )
 
 // ServerError is a common structure for FDS client error
