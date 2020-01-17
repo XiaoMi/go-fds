@@ -50,4 +50,4 @@ func main() {
 For more sample, please look into `example` package
 
 ## Development
-To develop go-fds, you'd better to upgrade your go version to 1.11+，because there is a `go modules` concept from go1.11, which can make it convenient.
+To develop go-fds, you'd better to upgrade your go version to 1.13+.
