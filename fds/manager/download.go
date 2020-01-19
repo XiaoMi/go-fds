@@ -119,8 +119,8 @@ func (downloader *Downloader) DownloadWithContext(ctx context.Context, request *
 		// validate breakpoint info
 		err = bp.Validate(request.BucketName, request.ObjectName, r)
 		if err != nil {
-			downloader.logger.Warn(err)
-			downloader.logger.Warn("breakpoint info is invalid")
+			downloader.logger.Debug(err)
+			downloader.logger.Debug("breakpoint info is invalid")
 			bp.Initilize(downloader, request.BucketName, request.ObjectName, request.breakpointFilePath, r, metadata)
 			bp.Destroy()
 		}
