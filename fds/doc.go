@@ -13,8 +13,8 @@ Usage:
 		"log"
 		"os"
 
-		"github.com/hujianxin/go-fds/fds"
-		"github.com/hujianxin/go-fds/fds/manager"
+		"github.com/XiaoMi/go-fds/fds"
+		"github.com/XiaoMi/go-fds/fds/manager"
 	)
 
 	func main() {
@@ -28,7 +28,7 @@ Usage:
 				BucketName: "hellodf",
 				ObjectName: "build.log",
 			},
-			FilePath: "/home/hujianxin/tmp/build.log",
+			FilePath: "/home/XiaoMi/tmp/build.log",
 		}
 		err := downloader.Download(request)
 		if err != nil {

@@ -1,4 +1,4 @@
-module github.com/hujianxin/go-fds
+module github.com/XiaoMi/go-fds
 
 require (
 	github.com/google/uuid v1.0.0

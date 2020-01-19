@@ -1,8 +1,8 @@
 # go-fds
 FDS Go SDK.
 
-[![Build Status](https://travis-ci.org/hujianxin/go-fds.svg?branch=master)](https://travis-ci.org/hujianxin/go-fds)
-[![Go Report Card](https://goreportcard.com/badge/github.com/hujianxin/go-fds)](https://goreportcard.com/report/github.com/hujianxin/go-fds)
+[![Build Status](https://travis-ci.org/XiaoMi/go-fds.svg?branch=master)](https://travis-ci.org/XiaoMi/go-fds)
+[![Go Report Card](https://goreportcard.com/badge/github.com/XiaoMi/go-fds)](https://goreportcard.com/report/github.com/XiaoMi/go-fds)
 
 [The formal Go SDK of FDS](https://github.com/XiaoMi/go-fdslang) is not well designed, but constrained by the fixed interface, I can't reconstruct it in large scale.
 
@@ -11,7 +11,7 @@ So, I start up this project for a good sdk design.
 :sparkles: :sparkles: :sparkles: **We got context support working, which make your concurrent program more fluent**
 
 ## Install
-`go get -u github.com/hujianxin/go-fds`
+`go get -u github.com/XiaoMi/go-fds`
 
 ## Usage
 ```go
@@ -21,8 +21,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/hujianxin/go-fds/fds"
-	"github.com/hujianxin/go-fds/fds/manager"
+	"github.com/XiaoMi/go-fds/fds"
+	"github.com/XiaoMi/go-fds/fds/manager"
 )
 
 func main() {
@@ -36,7 +36,7 @@ func main() {
 			BucketName: "hellodf",
 			ObjectName: "build.log",
 		},
-		FilePath: "/home/hujianxin/tmp/build.log",
+		FilePath: "/home/XiaoMi/tmp/build.log",
 	}
 	err := downloader.Download(request)
 	if err != nil {

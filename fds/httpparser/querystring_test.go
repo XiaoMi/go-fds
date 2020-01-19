@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hujianxin/go-fds/fds/httpparser"
+	"github.com/XiaoMi/go-fds/fds/httpparser"
 	"github.com/stretchr/testify/assert"
 )
 

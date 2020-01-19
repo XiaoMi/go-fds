@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/hujianxin/go-fds/fds"
+	"github.com/XiaoMi/go-fds/fds"
 )
 
 func main() {

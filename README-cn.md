@@ -14,7 +14,7 @@
 最后，auth.go里面的signature方法是直接使用了旧SDK中的代码。
 
 ## 安装
-`go get -u github.com/hujianxin/go-fds`
+`go get -u github.com/XiaoMi/go-fds`
 
 ## 用法
 ```go
@@ -24,8 +24,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/hujianxin/go-fds/fds"
-	"github.com/hujianxin/go-fds/fds/manager"
+	"github.com/XiaoMi/go-fds/fds"
+	"github.com/XiaoMi/go-fds/fds/manager"
 )
 
 func main() {
@@ -39,7 +39,7 @@ func main() {
 			BucketName: "hellodf",
 			ObjectName: "build.log",
 		},
-		FilePath: "/home/hujianxin/tmp/build.log",
+		FilePath: "/home/XiaoMi/tmp/build.log",
 	}
 	err := downloader.Download(request)
 	if err != nil {

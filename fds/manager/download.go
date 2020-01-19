@@ -11,8 +11,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/hujianxin/go-fds/fds"
-	"github.com/hujianxin/go-fds/fds/httpparser"
+	"github.com/XiaoMi/go-fds/fds"
+	"github.com/XiaoMi/go-fds/fds/httpparser"
 	"github.com/sirupsen/logrus"
 )
 
