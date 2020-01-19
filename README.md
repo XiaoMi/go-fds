@@ -29,7 +29,7 @@ func main() {
 	conf, _ := fds.NewClientConfiguration(os.Getenv("GO_FDS_TEST_ENDPOINT"))
 	client := fds.New(os.Getenv("GO_FDS_TEST_ACCESS_KEY_ID"), os.Getenv("GO_FDS_TEST_ACCESS_KEY_SECRET"), conf)
 
-	downloader := manager.NewDownloader(client, 1024*1024, 10, true)
+	downloader, _ := manager.NewDownloader(client, 1024*1024, 10, true)
 
 	request := &manager.DownloadRequest{
 		GetObjectRequest: fds.GetObjectRequest{
