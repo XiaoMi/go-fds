@@ -106,7 +106,6 @@ func (client *Client) doRequest(ctx context.Context, method HTTPMethod, url *url
 
 	data = dataFile
 
-	req.Header.Add(HTTPHeaderContentType, "")
 	req.Header.Add(HTTPHeaderContentMD5, "")
 	req.Header.Add(HTTPHeaderDate, time.Now().Format(time.RFC1123))
 
