@@ -60,3 +60,11 @@ const (
 
 	Version = "0.9.0" // Go SDK version
 )
+
+// Storage Class
+type StorageClass string
+const (
+	Standard			StorageClass = "STANDARD"
+	StandardInfrequentAccess	StorageClass = "STANDARD_IA"
+	Archive				StorageClass = "Archive"
+)

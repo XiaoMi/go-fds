@@ -12,6 +12,7 @@ import (
 // OrgID is option, if setted, bucket will be created under orgnization of orgid
 type CreateBucketRequest struct {
 	BucketName string `param:"-" header:"-"`
+	StorageClassType StorageClass `param:"storageClass,omitempty" header:"-"`
 	OrgID      string `param:"orgId,omitempty" header:"-"`
 }
 

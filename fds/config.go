@@ -79,7 +79,7 @@ func defaultFDSClientConfiguration() *ClientConfiguration {
 	config.Endpoint = ""
 	config.EnableHTTPS = true
 	config.EnableCDNForUpload = false
-	config.EnableCDNForDownload = true
+	config.EnableCDNForDownload = false
 	config.EnableMd5Calculate = false
 	config.Timeout = 50
 	config.HTTPTimeout.ConnectTimeout = time.Second * 30   // 30s
