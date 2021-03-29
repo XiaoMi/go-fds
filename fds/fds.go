@@ -49,6 +49,7 @@ type clientRequest struct {
 	ObjectName         string
 	Method             HTTPMethod
 	QueryHeaderOptions interface{}
+	Metadata           *ObjectMetadata
 	Data               io.Reader
 	Result             interface{}
 }
@@ -69,6 +70,11 @@ func (client *Client) do(ctx context.Context, request *clientRequest) (*http.Res
 	header, e := httpparser.Header(request.QueryHeaderOptions)
 	if e != nil {
 		return nil, e
+	}
+	if request.Metadata != nil {
+		for k,v := range request.Metadata.metadata {
+			header.Add(k, v)
+		}
 	}
 
 	return client.doRequest(ctx, request.Method, u, header, request.Data, request.Result)
@@ -106,14 +112,14 @@ func (client *Client) doRequest(ctx context.Context, method HTTPMethod, url *url
 
 	data = dataFile
 
-	req.Header.Add(HTTPHeaderContentMD5, "")
-	req.Header.Add(HTTPHeaderDate, time.Now().Format(time.RFC1123))
+	//req.Header.Add(HTTPHeaderContentMD5, "")
+	req.Header.Set(HTTPHeaderDate, time.Now().Format(time.RFC1123))
 
 	signature, err := signature(client.AccessSecret, method, url.String(), req.Header)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add(HTTPHeaderAuthorization, fmt.Sprintf("Galaxy-V2 %s:%s", client.AccessID, signature))
+	req.Header.Set(HTTPHeaderAuthorization, fmt.Sprintf("Galaxy-V2 %s:%s", client.AccessID, signature))
 
 	for k, v := range req.Header {
 		client.logger.Debug(fmt.Sprintf(" >>> HTTP Header: k=%s, v=%s", k, v))

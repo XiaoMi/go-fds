@@ -8,19 +8,26 @@ const (
 	XiaomiMetaPrefix                = "x-xiaomi-meta-"
 	HTTPHeaderGalaxyAccessKeyID     = "GalaxyAccessKeyId"
 	HTTPHeaderSignature             = "Signature"
-	HTTPHeaderCacheControl          = "Cache-Control"
-	HTTPHeaderContentLength         = "Content-Length"
-	HTTPHeaderContentEncoding       = "Content-Encoding"
-	HTTPHeaderLastModified          = "Last-Modified"
-	HTTPHeaderContentMD5            = "Content-MD5"
-	HTTPHeaderContentType           = "Content-Type"
-	HTTPHeaderLastChecked           = "Last-Checked"
-	HTTPHeaderUploadTime            = "Upload-Time"
-	HTTPHeaderContentMetadataLength = XiaomiMetaPrefix + HTTPHeaderContentLength
 	HTTPHeaderExpires               = "Expires"
-	HTTPHeaderDate                  = "Date"
-	HTTPHeaderAuthorization         = "Authorization"
-	HTTPHeaderRange                 = "Range"
+
+	HTTPHeaderCacheControl          = "cache-control"
+	HTTPHeaderContentLength         = "content-length"
+	HTTPHeaderContentEncoding       = "content-encoding"
+	HTTPHeaderLastModified          = "last-modified"
+	HTTPHeaderContentMD5            = "content-md5"
+	HTTPHeaderContentType           = "content-type"
+	HTTPHeaderLastChecked           = "last-checked"
+	HTTPHeaderUploadTime            = "upload-time"
+	HTTPHeaderDate                  = "date"
+	HTTPHeaderAuthorization         = "authorization"
+	HTTPHeaderRange                 = "range"
+	HTTPHeaderContentRange          = "content-range"
+	HTTPHeaderContentMetadataLength = XiaomiMetaPrefix + HTTPHeaderContentLength
+	HTTPHeaderServerSideEncryption  = XiaomiMetaPrefix + "server-side-encryption"
+	HTTPHeaderStorageClass          = XiaomiMetaPrefix + "storage-class"
+	HTTPHeaderOngoingRestore        = XiaomiMetaPrefix + "ongoing-restore"
+	HTTPHeaderRestoreExpireDate     = XiaomiMetaPrefix + "restore-expiry"
+	HTTPHeaderCRC64ECMA             = XiaomiMetaPrefix + "hash-crc64ecma"
 )
 
 // HTTPMethod HTTP request method
@@ -46,7 +53,7 @@ const (
 // Other constants
 const (
 	MaxPartSize = 5 * 1024 * 1024 * 1024 // Max part size, 5GB
-	MinPartSize = 100 * 1024             // Min part size, 100KB
+	MinPartSize = 5 * 1024 * 1024        // Min part size, 5MB
 
 	FilePermMode = os.FileMode(0664) // Default file permission
 

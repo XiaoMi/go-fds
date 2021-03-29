@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"strconv"
 	"time"
+	"strings"
 )
 
 // GetObjectRequest is the input of GetObject method
@@ -53,8 +54,9 @@ type PutObjectRequest struct {
 	ContentEncoding    string `header:"Content-Encoding,omitempty" param:"-"`
 	ContentType        string `header:"Content-Type,omitempty" param:"-"`
 	ContentLength      int    `header:"Content-Length,omitempty" param:"-"`
+	ContentMd5         string `header:"Content-Md5,omitempty" param:"-"`
 	Expect             string `header:"Expect,omitempty" param:"-"`
-	Expires            string `header:"Expires,omitempty" param:"-"`
+	Metadata           *ObjectMetadata `header:"-" param:"-"`
 }
 
 // PutObjectResponse is the result of PutObject method
@@ -81,6 +83,7 @@ func (client *Client) PutObjectWithContext(ctx context.Context, request *PutObje
 		ObjectName:         request.ObjectName,
 		Data:               request.Data,
 		QueryHeaderOptions: request,
+		Metadata:           request.Metadata,
 		Method:             HTTPPut,
 		Result:             result,
 	}
@@ -293,22 +296,60 @@ func (client *Client) DeleteObjectsWithPrefixWithContext(ctx context.Context, bu
 
 // ObjectMetadata is metadata of object
 type ObjectMetadata struct {
-	h http.Header
+	metadata map[string]string
+}
+
+
+var predefinedMetadata = map[string]string{
+        HTTPHeaderCacheControl          : "",
+        HTTPHeaderContentLength         : "",
+        HTTPHeaderContentEncoding       : "",
+        HTTPHeaderLastModified          : "",
+        HTTPHeaderContentMD5            : "",
+        HTTPHeaderContentType           : "",
+        HTTPHeaderLastChecked           : "",
+        HTTPHeaderUploadTime            : "",
+        HTTPHeaderDate                  : "",
+        HTTPHeaderAuthorization         : "",
+        HTTPHeaderRange                 : "",
+        HTTPHeaderContentRange          : "",
+        HTTPHeaderContentMetadataLength : "",
+        HTTPHeaderServerSideEncryption  : "",
+        HTTPHeaderStorageClass          : "",
+        HTTPHeaderOngoingRestore        : "",
+        HTTPHeaderRestoreExpireDate     : "",
+        HTTPHeaderCRC64ECMA             : "",
 }
 
 // NewObjectMetadata create a default ObjectMetadata
 func NewObjectMetadata() *ObjectMetadata {
-	return &ObjectMetadata{http.Header{}}
+	return &ObjectMetadata{map[string]string{}}
 }
 
 // Get method of ObjectMetadata
 func (metadata *ObjectMetadata) Get(k string) string {
-	return metadata.h.Get(k)
+	key := strings.ToLower(k)
+	return metadata.metadata[key]
 }
 
 // Set method of ObjectMetadata
-func (metadata *ObjectMetadata) Set(k, v string) {
-	metadata.h.Set(k, v)
+func (metadata *ObjectMetadata) Set(k, v string) error {
+	key := strings.ToLower(k)
+	_, ok := predefinedMetadata[key]
+	if ok || strings.HasPrefix(key, XiaomiMetaPrefix) {
+		metadata.metadata[key] = v
+		return nil
+	} else {
+		return errors.New("Invalid metadata: " + k)
+	}
+}
+
+func (metadata *ObjectMetadata) GetRawMetadata() map[string]string {
+	data := make(map[string]string)
+	for k,v := range metadata.metadata {
+		data[k] = v
+	}
+	return data
 }
 
 // GetContentLength gets ContentLength of object metadata
@@ -321,20 +362,36 @@ func (metadata *ObjectMetadata) SetContentLength(length int64) {
 	metadata.Set(HTTPHeaderContentMetadataLength, strconv.FormatInt(length, 10))
 }
 
+func (metadata *ObjectMetadata) GetContentType() string {
+	return metadata.Get(HTTPHeaderContentType)
+}
+
+func (metadata *ObjectMetadata) SetContentType(contentType string) {
+	metadata.Set(HTTPHeaderContentType, contentType)
+}
+
 func (metadata *ObjectMetadata) serialize() ([]byte, error) {
-	x := make(map[string]string)
-	for k := range metadata.h {
-		x[k] = metadata.Get(k)
-	}
 	data := make(map[string]map[string]string)
 
-	data["rawMeta"] = x
+	data["rawMeta"] = metadata.metadata
 	result, e := json.Marshal(data)
 	if e != nil {
 		return nil, e
 	}
 
 	return result, nil
+}
+
+func parseObjectMetadataFromHeader(header http.Header) *ObjectMetadata {
+	objectMetadata := NewObjectMetadata()
+	for k := range header {
+		key := strings.ToLower(k)
+		_, ok := predefinedMetadata[key]
+		if ok || strings.HasPrefix(key, XiaomiMetaPrefix) {
+			objectMetadata.Set(key, header.Get(k))
+		}
+	}
+	return objectMetadata
 }
 
 type getObjectMetadataOption struct {
@@ -348,7 +405,6 @@ func (client *Client) GetObjectMetadata(bucketName, objectName string) (*ObjectM
 
 // GetObjectMetadataWithContext gets metadata of objectName in bucketName with context controlling
 func (client *Client) GetObjectMetadataWithContext(ctx context.Context, bucketName, objectName string) (*ObjectMetadata, error) {
-	result := &ObjectMetadata{}
 	req := &clientRequest{
 		BucketName:         bucketName,
 		ObjectName:         objectName,
@@ -358,16 +414,16 @@ func (client *Client) GetObjectMetadataWithContext(ctx context.Context, bucketNa
 
 	resp, err := client.do(ctx, req)
 	if err != nil {
-		return result, err
+		return &ObjectMetadata{}, err
 	}
 	defer resp.Body.Close()
-	result.h = resp.Header
+	result := parseObjectMetadataFromHeader(resp.Header)
 
 	return result, nil
 }
 
 type setObjectMetadataOption struct {
-	SetMetadata string `param:"setMetaData" header:""`
+	SetMetadata string `param:"setMetaData" header:"-"`
 }
 
 // SetObjectMetadataRequest is input of SetObjectMetadata
@@ -502,7 +558,6 @@ type InitMultipartUploadRequest struct {
 	ContentType        string `header:"Content-Type,omitempty" param:"-"`
 	ContentLength      int    `header:"Content-Length,omitempty" param:"-"`
 	Expect             string `header:"Expect,omitempty" param:"-"`
-	Expires            string `header:"Expires,omitempty" param:"-"`
 }
 
 // InitMultipartUploadResponse is result of InitMultipartUpload
@@ -693,7 +748,12 @@ func (client *Client) GeneratePresignedURL(request *GeneratePresignedURLRequest)
 	params.Add(HTTPHeaderExpires, fmt.Sprintf("%d", request.Expiration.UnixNano()/int64(time.Millisecond)))
 	baseURL.RawQuery = params.Encode()
 
-	sig, e := signature(client.AccessSecret, request.Method, baseURL.String(), request.Metadata.h)
+	header := http.Header{}
+	for k,v := range request.Metadata.metadata {
+		header.Set(k, v)
+	}
+
+	sig, e := signature(client.AccessSecret, request.Method, baseURL.String(), header)
 	if e != nil {
 		return nil, e
 	}
