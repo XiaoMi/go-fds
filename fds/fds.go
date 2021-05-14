@@ -72,7 +72,7 @@ func (client *Client) do(ctx context.Context, request *clientRequest) (*http.Res
 		return nil, e
 	}
 	if request.Metadata != nil {
-		for k,v := range request.Metadata.metadata {
+		for k, v := range request.Metadata.metadata {
 			header.Add(k, v)
 		}
 	}
@@ -175,14 +175,7 @@ func checkResponseStatus(response *http.Response, allowed []int) error {
 			return err
 		}
 
-		if len(respBody) == 0 {
-			// No error in response body
-			err = fmt.Errorf("fds: server returned without a response body (%s)", response.Status)
-		} else {
-			// clientResponse contains storage service error object, unmarshal
-			err = newServerError(string(respBody), response.StatusCode)
-		}
-
+		err = newServerError(string(respBody), response.StatusCode)
 		response.Body = ioutil.NopCloser(bytes.NewReader(respBody))
 	} else if statusCode >= 300 && statusCode <= 307 {
 		err = newServerError(fmt.Sprintf("fds: service returned %s", response.Status), response.StatusCode)

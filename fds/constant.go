@@ -4,11 +4,11 @@ import "os"
 
 // Headers
 const (
-	XiaomiPrefix                    = "x-xiaomi-"
-	XiaomiMetaPrefix                = "x-xiaomi-meta-"
-	HTTPHeaderGalaxyAccessKeyID     = "GalaxyAccessKeyId"
-	HTTPHeaderSignature             = "Signature"
-	HTTPHeaderExpires               = "Expires"
+	XiaomiPrefix                = "x-xiaomi-"
+	XiaomiMetaPrefix            = "x-xiaomi-meta-"
+	HTTPHeaderGalaxyAccessKeyID = "GalaxyAccessKeyId"
+	HTTPHeaderSignature         = "Signature"
+	HTTPHeaderExpires           = "Expires"
 
 	HTTPHeaderCacheControl          = "cache-control"
 	HTTPHeaderContentLength         = "content-length"
@@ -70,8 +70,9 @@ const (
 
 // Storage Class
 type StorageClass string
+
 const (
-	Standard			StorageClass = "STANDARD"
-	StandardInfrequentAccess	StorageClass = "STANDARD_IA"
-	Archive				StorageClass = "Archive"
+	Standard                 StorageClass = "STANDARD"
+	StandardInfrequentAccess StorageClass = "STANDARD_IA"
+	Archive                  StorageClass = "Archive"
 )

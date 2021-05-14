@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"time"
 	"strings"
+	"time"
 )
 
 // GetObjectRequest is the input of GetObject method
@@ -49,13 +49,13 @@ type PutObjectRequest struct {
 	ObjectName string    `param:"-" header:"-"`
 	Data       io.Reader `param:"-" header:"-"`
 
-	CacheControl       string `header:"Cache-Control,omitempty" param:"-"`
-	ContentDisposition string `header:"Content-Disposition,omitempty" param:"-"`
-	ContentEncoding    string `header:"Content-Encoding,omitempty" param:"-"`
-	ContentType        string `header:"Content-Type,omitempty" param:"-"`
-	ContentLength      int    `header:"Content-Length,omitempty" param:"-"`
-	ContentMd5         string `header:"Content-Md5,omitempty" param:"-"`
-	Expect             string `header:"Expect,omitempty" param:"-"`
+	CacheControl       string          `header:"Cache-Control,omitempty" param:"-"`
+	ContentDisposition string          `header:"Content-Disposition,omitempty" param:"-"`
+	ContentEncoding    string          `header:"Content-Encoding,omitempty" param:"-"`
+	ContentType        string          `header:"Content-Type,omitempty" param:"-"`
+	ContentLength      int             `header:"Content-Length,omitempty" param:"-"`
+	ContentMd5         string          `header:"Content-Md5,omitempty" param:"-"`
+	Expect             string          `header:"Expect,omitempty" param:"-"`
 	Metadata           *ObjectMetadata `header:"-" param:"-"`
 }
 
@@ -299,26 +299,25 @@ type ObjectMetadata struct {
 	metadata map[string]string
 }
 
-
 var predefinedMetadata = map[string]string{
-        HTTPHeaderCacheControl          : "",
-        HTTPHeaderContentLength         : "",
-        HTTPHeaderContentEncoding       : "",
-        HTTPHeaderLastModified          : "",
-        HTTPHeaderContentMD5            : "",
-        HTTPHeaderContentType           : "",
-        HTTPHeaderLastChecked           : "",
-        HTTPHeaderUploadTime            : "",
-        HTTPHeaderDate                  : "",
-        HTTPHeaderAuthorization         : "",
-        HTTPHeaderRange                 : "",
-        HTTPHeaderContentRange          : "",
-        HTTPHeaderContentMetadataLength : "",
-        HTTPHeaderServerSideEncryption  : "",
-        HTTPHeaderStorageClass          : "",
-        HTTPHeaderOngoingRestore        : "",
-        HTTPHeaderRestoreExpireDate     : "",
-        HTTPHeaderCRC64ECMA             : "",
+	HTTPHeaderCacheControl:          "",
+	HTTPHeaderContentLength:         "",
+	HTTPHeaderContentEncoding:       "",
+	HTTPHeaderLastModified:          "",
+	HTTPHeaderContentMD5:            "",
+	HTTPHeaderContentType:           "",
+	HTTPHeaderLastChecked:           "",
+	HTTPHeaderUploadTime:            "",
+	HTTPHeaderDate:                  "",
+	HTTPHeaderAuthorization:         "",
+	HTTPHeaderRange:                 "",
+	HTTPHeaderContentRange:          "",
+	HTTPHeaderContentMetadataLength: "",
+	HTTPHeaderServerSideEncryption:  "",
+	HTTPHeaderStorageClass:          "",
+	HTTPHeaderOngoingRestore:        "",
+	HTTPHeaderRestoreExpireDate:     "",
+	HTTPHeaderCRC64ECMA:             "",
 }
 
 // NewObjectMetadata create a default ObjectMetadata
@@ -346,7 +345,7 @@ func (metadata *ObjectMetadata) Set(k, v string) error {
 
 func (metadata *ObjectMetadata) GetRawMetadata() map[string]string {
 	data := make(map[string]string)
-	for k,v := range metadata.metadata {
+	for k, v := range metadata.metadata {
 		data[k] = v
 	}
 	return data
@@ -551,13 +550,6 @@ type InitMultipartUploadRequest struct {
 	initMultipartUploadOption
 	BucketName string `param:"-" header:"-"`
 	ObjectName string `param:"-" header:"-"`
-
-	CacheControl       string `header:"Cache-Control,omitempty" param:"-"`
-	ContentDisposition string `header:"Content-Disposition,omitempty" param:"-"`
-	ContentEncoding    string `header:"Content-Encoding,omitempty" param:"-"`
-	ContentType        string `header:"Content-Type,omitempty" param:"-"`
-	ContentLength      int    `header:"Content-Length,omitempty" param:"-"`
-	Expect             string `header:"Expect,omitempty" param:"-"`
 }
 
 // InitMultipartUploadResponse is result of InitMultipartUpload
@@ -639,15 +631,36 @@ type UploadPartList struct {
 	UploadPartResultList []UploadPartResponse `json:"uploadPartResultList"`
 }
 
+// CompleteMultipartUploadRequest is required by CompleteMultipartUpload
+type CompleteMultipartUploadRequest struct {
+	BucketName string `param:"-" header:"-"`
+	ObjectName string `param:"-" header:"-"`
+	UploadID   string `param:"uploadId" header:"-"`
+
+	UploadParts *UploadPartList `header:"-" param:"-"`
+	Metadata    *ObjectMetadata `header:"-" param:"-"`
+}
+
 // CompleteMultipartUpload completes the progress of multipart uploading
 func (client *Client) CompleteMultipartUpload(request *InitMultipartUploadResponse, list *UploadPartList) (*PutObjectResponse, error) {
-	return client.CompleteMultipartUploadWithContext(context.Background(), request, list)
+	completeMultipartUploadRequest := &CompleteMultipartUploadRequest{
+		BucketName:  request.BucketName,
+		ObjectName:  request.ObjectName,
+		UploadID:    request.UploadID,
+		UploadParts: list,
+	}
+	return client.CompleteMultipartUploadWithContext(context.Background(), completeMultipartUploadRequest)
+}
+
+// CompleteMultipartUpload completes the progress of multipart uploading
+func (client *Client) CompleteMultipartUploadV2(request *CompleteMultipartUploadRequest) (*PutObjectResponse, error) {
+	return client.CompleteMultipartUploadWithContext(context.Background(), request)
 }
 
 // CompleteMultipartUploadWithContext completes the progress of multipart uploading with context controlling
-func (client *Client) CompleteMultipartUploadWithContext(ctx context.Context, request *InitMultipartUploadResponse, list *UploadPartList) (*PutObjectResponse, error) {
+func (client *Client) CompleteMultipartUploadWithContext(ctx context.Context, request *CompleteMultipartUploadRequest) (*PutObjectResponse, error) {
 	result := &PutObjectResponse{}
-	data, e := json.Marshal(*list)
+	data, e := json.Marshal(*request.UploadParts)
 	if e != nil {
 		return result, e
 	}
@@ -658,6 +671,7 @@ func (client *Client) CompleteMultipartUploadWithContext(ctx context.Context, re
 		Method:             HTTPPut,
 		Data:               bytes.NewReader(data),
 		QueryHeaderOptions: request,
+		Metadata:           request.Metadata,
 		Result:             result,
 	}
 
@@ -749,7 +763,7 @@ func (client *Client) GeneratePresignedURL(request *GeneratePresignedURLRequest)
 	baseURL.RawQuery = params.Encode()
 
 	header := http.Header{}
-	for k,v := range request.Metadata.metadata {
+	for k, v := range request.Metadata.metadata {
 		header.Set(k, v)
 	}
 

@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"log"
-	"os"
 	"net/http"
+	"os"
 
 	"github.com/XiaoMi/go-fds/fds"
 )
@@ -18,17 +18,17 @@ func main() {
 
 	fdsClient := fds.New(os.Getenv("GO_FDS_TEST_ACCESS_KEY_ID"), os.Getenv("GO_FDS_TEST_ACCESS_KEY_SECRET"), fdsConf)
 
-        // user defined metadata
-        objectMetaData := fds.NewObjectMetadata()
-        objectMetaData.Set(fds.XiaomiMetaPrefix + "uid", "1000")
+	// user defined metadata
+	objectMetaData := fds.NewObjectMetadata()
+	objectMetaData.Set(fds.XiaomiMetaPrefix+"uid", "1000")
 
 	request := &fds.PutObjectRequest{
-		BucketName: "bucketname",
-		ObjectName: "test.txt",
+		BucketName:  "bucketname",
+		ObjectName:  "test.txt",
 		ContentType: "text/plain",
-		ContentMd5: "5eb63bbbe01eeed093cb22bb8f5acdc3",
-		Metadata: objectMetaData,
-		Data:       bytes.NewReader([]byte("hello world")),
+		ContentMd5:  "5eb63bbbe01eeed093cb22bb8f5acdc3",
+		Metadata:    objectMetaData,
+		Data:        bytes.NewReader([]byte("hello world")),
 	}
 
 	resp, err := fdsClient.PutObject(request)

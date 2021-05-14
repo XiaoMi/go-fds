@@ -1,7 +1,7 @@
 package main
 
 import (
-//	"fmt"
+	//	"fmt"
 	"log"
 	"os"
 
@@ -18,11 +18,11 @@ func main() {
 
 	objectMetaData := fds.NewObjectMetadata()
 	objectMetaData.SetContentType("image/png")
-	objectMetaData.Set(fds.XiaomiMetaPrefix + "uid", "1000")
+	objectMetaData.Set(fds.XiaomiMetaPrefix+"uid", "1000")
 	setObjectMetadataRequest := &fds.SetObjectMetadataRequest{
 		BucketName: "bucketname",
 		ObjectName: "test.txt",
-		Metadata: objectMetaData,
+		Metadata:   objectMetaData,
 	}
 
 	err = fdsClient.SetObjectMetadata(setObjectMetadataRequest)
