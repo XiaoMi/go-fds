@@ -6,9 +6,6 @@ import (
 	"sync"
 
 	"github.com/RangerCD/cslb"
-	"github.com/RangerCD/cslb/node"
-	"github.com/RangerCD/cslb/service"
-	"github.com/RangerCD/cslb/strategy"
 )
 
 const (
@@ -28,11 +25,11 @@ func (d *cslbDialer) DialContext(ctx context.Context, network, address string) (
 		if !ok {
 			maxNodeCount := d.maxNodeCount
 			if maxNodeCount <= 0 {
-				maxNodeCount = node.NodeCountUnlimited
+				maxNodeCount = cslb.NodeCountUnlimited
 			}
 			lb = cslb.NewLoadBalancer(
-				service.NewRRDNSService([]string{host}, true, true),
-				strategy.NewRoundRobinStrategy(),
+				cslb.NewRRDNSService([]string{host}, true, true),
+				cslb.NewRoundRobinStrategy(),
 				cslb.LoadBalancerOption{
 					MaxNodeCount:        int(maxNodeCount),
 					TTL:                 DNSCacheTTLSecond,
