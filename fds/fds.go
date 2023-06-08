@@ -9,21 +9,25 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
-	"github.com/XiaoMi/go-fds/fds/httpparser"
 	"github.com/sirupsen/logrus"
+
+	"github.com/XiaoMi/go-fds/fds/httpparser"
 )
 
 // Client supplies an interface for interaction with FDS
 type Client struct {
 	logger     *logrus.Logger
 	httpClient *http.Client
+	transport  *http.Transport
 
 	Configuration *ClientConfiguration
 	AccessID      string
@@ -36,7 +40,26 @@ func New(accessID, accessSecret string, conf *ClientConfiguration) *Client {
 	client.Configuration = conf
 	client.AccessID = accessID
 	client.AccessSecret = accessSecret
-	client.httpClient = &http.Client{}
+	// Ref: net/http.DefaultTransport
+	client.transport = &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&cslbDialer{
+			Dialer: net.Dialer{
+				Timeout:   30 * time.Second,
+				KeepAlive: 30 * time.Second,
+			},
+			maxNodeCount: conf.MaxConnection,
+			lbs:          sync.Map{},
+		}).DialContext,
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+	}
+	client.httpClient = &http.Client{
+		Transport: client.transport,
+	}
 	client.logger = logrus.New()
 
 	client.logger.SetLevel(logrus.WarnLevel)

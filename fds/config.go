@@ -32,6 +32,7 @@ type ClientConfiguration struct {
 	RetryCount             uint
 	RetryInterval          uint
 	PartSize               uint
+	MaxDNSRecord           uint
 	DownloadBandwidth      uint64
 	UploadBandwidth        uint64
 	HTTPKeepAliveTimeoutMs uint64
@@ -92,6 +93,7 @@ func defaultFDSClientConfiguration() *ClientConfiguration {
 	config.RetryCount = 3
 	config.RetryInterval = 500 // ms
 	config.PartSize = 10 * 1024 * 1024
+	config.MaxDNSRecord = 0
 	config.DownloadBandwidth = 10 * 1024 * 1024
 	config.UploadBandwidth = 10 * 1024 * 1024
 
