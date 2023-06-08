@@ -128,7 +128,7 @@ func (downloader *Downloader) DownloadWithContext(ctx context.Context, request *
 		// get parts from breakpoint info
 		parts = bp.UnfinishParts()
 	} else {
-		parts, err = downloader.splitDownloadParts(contentLength, r)
+		parts, err = downloader.splitDownloadParts(r)
 		if err != nil {
 			return err
 		}
@@ -229,7 +229,7 @@ type part struct {
 	Offset int64
 }
 
-func (downloader Downloader) splitDownloadParts(contentLength int64, r httpparser.HTTPRange) ([]part, error) {
+func (downloader Downloader) splitDownloadParts(r httpparser.HTTPRange) ([]part, error) {
 	var parts []part
 
 	i := 0
@@ -237,7 +237,7 @@ func (downloader Downloader) splitDownloadParts(contentLength int64, r httpparse
 		p := part{
 			Index:  i,
 			Start:  offset,
-			End:    getEnd(offset, r.End, contentLength),
+			End:    getEnd(offset, r.End, downloader.PartSize),
 			Offset: r.Start,
 		}
 		i++
@@ -368,7 +368,7 @@ func (bp *breakpointInfo) Initilize(downloader *Downloader,
 		return err
 	}
 
-	parts, err := downloader.splitDownloadParts(contentLength, r)
+	parts, err := downloader.splitDownloadParts(r)
 	if err != nil {
 		return err
 	}
