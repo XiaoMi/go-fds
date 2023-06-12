@@ -9,7 +9,10 @@ import (
 )
 
 const (
-	DNSCacheTTLSecond = 600
+	DNSCacheTTLSecond   = 600
+	LBDialRetries       = 3
+	MinHealthyNodeRatio = 0.5
+	MaxNodeFailedRatio  = 0
 )
 
 type cslbDialer struct {
@@ -33,14 +36,22 @@ func (d *cslbDialer) DialContext(ctx context.Context, network, address string) (
 				cslb.LoadBalancerOption{
 					MaxNodeCount:        int(maxNodeCount),
 					TTL:                 DNSCacheTTLSecond,
-					MinHealthyNodeRatio: cslb.HealthyNodeAny,
+					MinHealthyNodeRatio: MinHealthyNodeRatio,
+					MaxNodeFailedRatio:  MaxNodeFailedRatio,
 				})
 			d.lbs.Store(host, lb)
 		} else {
 			lb = val.(*cslb.LoadBalancer)
 		}
-		if addr, err := lb.Next(); err == nil {
-			return d.Dialer.DialContext(ctx, network, net.JoinHostPort(addr.String(), port))
+		for i := 0; i < LBDialRetries; i++ {
+			if addr, err := lb.Next(); err == nil {
+				conn, err := d.Dialer.DialContext(ctx, network, net.JoinHostPort(addr.String(), port))
+				if err == nil {
+					return conn, nil
+				} else {
+					lb.NodeFailed(addr)
+				}
+			}
 		}
 	}
 	// Fall back to default behavior if any error
