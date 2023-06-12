@@ -10,7 +10,7 @@ import (
 
 const (
 	DNSCacheTTLSecond   = 600
-	DialRetries         = 3
+	LBDialRetries       = 3
 	MinHealthyNodeRatio = 0.5
 	MaxNodeFailedRatio  = 0
 )
@@ -43,7 +43,7 @@ func (d *cslbDialer) DialContext(ctx context.Context, network, address string) (
 		} else {
 			lb = val.(*cslb.LoadBalancer)
 		}
-		for i := 0; i < DialRetries; i++ {
+		for i := 0; i < LBDialRetries; i++ {
 			if addr, err := lb.Next(); err == nil {
 				conn, err := d.Dialer.DialContext(ctx, network, net.JoinHostPort(addr.String(), port))
 				if err == nil {
