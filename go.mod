@@ -8,3 +8,5 @@ require (
 )
 
 go 1.13
+
+replace github.com/RangerCD/cslb v0.0.3 => github.com/sjp00556/cslb v0.0.0-20230625031216-3ee047010321
