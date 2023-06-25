@@ -5,7 +5,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/RangerCD/cslb"
+	"github.com/XiaoMi/go-fds/cslb"
 )
 
 const (
