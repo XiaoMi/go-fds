@@ -4,12 +4,13 @@ import (
 	"context"
 	"net"
 	"sync"
+	"time"
 
 	"github.com/XiaoMi/go-fds/cslb"
 )
 
 const (
-	DNSCacheTTLSecond   = 600
+	DNSCacheTTLSecond   = 600 * time.Second
 	LBDialRetries       = 3
 	MinHealthyNodeRatio = 0.5
 	MaxNodeFailedRatio  = 0

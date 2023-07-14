@@ -43,6 +43,15 @@ func NewLoadBalancer(service Service, strategy Strategy, option ...LoadBalancerO
 
 	if lb.option.TTL != TTLUnlimited {
 		lb.ttlTimer = time.NewTimer(lb.option.TTL)
+		go func() {
+			for {
+				select {
+				case <-lb.ttlTimer.C:
+					<-lb.refresh()
+					lb.ttlTimer.Reset(lb.option.TTL)
+				}
+			}
+		}()
 	}
 
 	return lb
@@ -54,16 +63,6 @@ func (lb *LoadBalancer) next(nextFunc func() (Node, error)) (Node, error) {
 		// Refresh and retry
 		<-lb.refresh()
 		next, err = nextFunc()
-	}
-
-	// Check TTL
-	if lb.ttlTimer != nil {
-		select {
-		case <-lb.ttlTimer.C:
-			// Background refresh
-			lb.refresh()
-		default:
-		}
 	}
 
 	if lb.metrics != nil {
@@ -112,15 +111,6 @@ func (lb *LoadBalancer) NodeFailed(node Node) {
 func (lb *LoadBalancer) refresh() <-chan singleflight.Result {
 	return lb.sf.DoChan(RefreshKey, func() (interface{}, error) {
 		lb.service.Refresh()
-
-		if lb.ttlTimer != nil {
-			select {
-			case <-lb.ttlTimer.C:
-			default:
-			}
-			lb.ttlTimer.Reset(lb.option.TTL)
-		}
-
 		if lb.metrics != nil {
 			lb.metrics.ResetAllNodes()
 		}
