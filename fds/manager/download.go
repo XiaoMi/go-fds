@@ -88,7 +88,7 @@ func (downloader *Downloader) DownloadWithContext(ctx context.Context, request *
 	}
 
 	if len(ranges) == 0 {
-		ranges = append(ranges, httpparser.HTTPRange{End: contentLength})
+		ranges = append(ranges, httpparser.HTTPRange{End: contentLength - 1})
 	}
 
 	if len(ranges) > 1 {
