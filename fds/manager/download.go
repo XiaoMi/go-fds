@@ -14,12 +14,14 @@ import (
 	"github.com/XiaoMi/go-fds/fds"
 	"github.com/XiaoMi/go-fds/fds/httpparser"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/time/rate"
 )
 
 // Downloader is a FDS client for file concurrency download
 type Downloader struct {
-	logger *logrus.Logger
-	client *fds.Client
+	logger  *logrus.Logger
+	client  *fds.Client
+	limiter *rate.Limiter
 
 	PartSize    int64
 	Concurrency int
@@ -36,12 +38,16 @@ func NewDownloader(client *fds.Client, partSize int64, concurrency int, breakpoi
 		return nil, ErrorConcurrencySmallerThanOne
 	}
 
+	// 0 means not limit the rate
+	limiter := rate.NewLimiter(0, 1)
+
 	downloader := &Downloader{
 		PartSize:    partSize,
 		Concurrency: concurrency,
 		Breakpoint:  breakpoint,
 
-		client: client,
+		client:  client,
+		limiter: limiter,
 	}
 	downloader.logger = logrus.New()
 	downloader.logger.SetLevel(logrus.WarnLevel)
@@ -175,7 +181,8 @@ func (downloader *Downloader) downloaderTaskConsumer(ctx context.Context, id int
 			ObjectName: request.ObjectName,
 			Range:      fmt.Sprintf("bytes=%v-%v", p.Start, p.End),
 		}
-
+		// block in here to take a token from bucket
+		downloader.limiter.Wait(context.Background())
 		data, err := downloader.client.GetObjectWithContext(ctx, req)
 		if err != nil {
 			downloader.logger.Debug(err.Error())
@@ -213,6 +220,14 @@ func (downloader *Downloader) downloaderTaskConsumer(ctx context.Context, id int
 		fd.Close()
 		results <- p
 	}
+}
+
+func (downloader *Downloader) SetLimiter(limiter *rate.Limiter) {
+	downloader.limiter = limiter
+}
+
+func (downloader *Downloader) SetLoggerLevel(level logrus.Level) {
+	downloader.logger.SetLevel(level)
 }
 
 func (downloader *Downloader) downloaderTaskProducer(jobs chan part, parts []part) {
