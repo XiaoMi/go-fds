@@ -38,16 +38,12 @@ func NewDownloader(client *fds.Client, partSize int64, concurrency int, breakpoi
 		return nil, ErrorConcurrencySmallerThanOne
 	}
 
-	// 0 means not limit the rate
-	limiter := rate.NewLimiter(0, 1)
-
 	downloader := &Downloader{
 		PartSize:    partSize,
 		Concurrency: concurrency,
 		Breakpoint:  breakpoint,
 
-		client:  client,
-		limiter: limiter,
+		client: client,
 	}
 	downloader.logger = logrus.New()
 	downloader.logger.SetLevel(logrus.WarnLevel)
