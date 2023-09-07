@@ -29,9 +29,13 @@ func main() {
 
 	bucketName := "hellotest"
 	objectName := "test.txt"
+	metadata := fds.NewObjectMetadata()
+	//如果需要乱序的并发传输，可以指定下面的传输模式
+	//_ = metadata.Set(fds.HTTPHeaderMultipartUploadMode, fds.ModeMultiBlob)
 	initRequest := &fds.InitMultipartUploadRequest{
 		BucketName: bucketName,
 		ObjectName: objectName,
+		Metadata:   metadata,
 	}
 
 	initResponse, err := fdsClient.InitMultipartUpload(initRequest)

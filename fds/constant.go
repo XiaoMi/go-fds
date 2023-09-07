@@ -28,6 +28,7 @@ const (
 	HTTPHeaderOngoingRestore        = XiaomiMetaPrefix + "ongoing-restore"
 	HTTPHeaderRestoreExpireDate     = XiaomiMetaPrefix + "restore-expiry"
 	HTTPHeaderCRC64ECMA             = XiaomiMetaPrefix + "hash-crc64ecma"
+	HTTPHeaderMultipartUploadMode   = XiaomiPrefix + "multipart-upload-mode"
 )
 
 // HTTPMethod HTTP request method
@@ -75,4 +76,9 @@ const (
 	Standard                 StorageClass = "STANDARD"
 	StandardInfrequentAccess StorageClass = "STANDARD_IA"
 	Archive                  StorageClass = "Archive"
+)
+
+const (
+	ModeMultiBlob = "MULTI_BLOB"
+	ModeDierect   = "DIRECT"
 )
