@@ -318,6 +318,7 @@ var predefinedMetadata = map[string]string{
 	HTTPHeaderOngoingRestore:        "",
 	HTTPHeaderRestoreExpireDate:     "",
 	HTTPHeaderCRC64ECMA:             "",
+	HTTPHeaderMultipartUploadMode:   "",
 }
 
 // NewObjectMetadata create a default ObjectMetadata
@@ -548,8 +549,9 @@ type initMultipartUploadOption struct {
 // InitMultipartUploadRequest is input of InitMultipartUpload
 type InitMultipartUploadRequest struct {
 	initMultipartUploadOption
-	BucketName string `param:"-" header:"-"`
-	ObjectName string `param:"-" header:"-"`
+	BucketName string          `param:"-" header:"-"`
+	ObjectName string          `param:"-" header:"-"`
+	Metadata   *ObjectMetadata `header:"-" param:"-"`
 }
 
 // InitMultipartUploadResponse is result of InitMultipartUpload
@@ -570,6 +572,7 @@ func (client *Client) InitMultipartUploadWithContext(ctx context.Context, reques
 	req := &clientRequest{
 		BucketName:         request.BucketName,
 		ObjectName:         request.ObjectName,
+		Metadata:           request.Metadata,
 		Method:             HTTPPut,
 		QueryHeaderOptions: request,
 		Result:             result,
