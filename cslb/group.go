@@ -1,13 +1,13 @@
 package cslb
 
 import (
-	"math"
+	"math/bits"
 	"sync"
 	"sync/atomic"
 )
 
 const (
-	NodeCountUnlimited = math.MaxInt
+	NodeCountUnlimited = (1 << bits.UintSize) / 2 - 1
 )
 
 type Group struct {
