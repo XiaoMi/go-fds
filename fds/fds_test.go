@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/XiaoMi/go-fds/fds"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -109,7 +109,7 @@ func (suite *GalaxyFDSTestSuite) TestSetBucketACL() {
 		Grantee: fds.GrantKey{
 			ID: "ALL_USERS",
 		},
-		Permission: fds.GrantPermissionRead,
+		Permission: fds.GrantPermissionReadObjects,
 		Type:       fds.GrantTypeGroup,
 	}
 

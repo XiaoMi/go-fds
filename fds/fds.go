@@ -45,16 +45,16 @@ func New(accessID, accessSecret string, conf *ClientConfiguration) *Client {
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&cslbDialer{
 			Dialer: net.Dialer{
-				Timeout:   30 * time.Second,
-				KeepAlive: 30 * time.Second,
+				Timeout:   conf.HTTPTimeout.ConnectTimeout,
+				KeepAlive: conf.HTTPTimeout.KeepAliveTimeout,
 			},
 			maxNodeCount: conf.MaxConnection,
 			lbs:          sync.Map{},
 		}).DialContext,
 		ForceAttemptHTTP2:     true,
 		MaxIdleConns:          100,
-		IdleConnTimeout:       90 * time.Second,
-		TLSHandshakeTimeout:   10 * time.Second,
+		IdleConnTimeout:       conf.HTTPTimeout.IdleConnTimeout,
+		TLSHandshakeTimeout:   conf.HTTPTimeout.ReadWriteTimeout,
 		ExpectContinueTimeout: 1 * time.Second,
 	}
 	client.httpClient = &http.Client{

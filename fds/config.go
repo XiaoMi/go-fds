@@ -13,6 +13,7 @@ type HTTPTimeout struct {
 	HeaderTimeout    time.Duration
 	LongTimeout      time.Duration
 	IdleConnTimeout  time.Duration
+	KeepAliveTimeout time.Duration
 }
 
 // ClientConfiguration required by FDSClient initialization
@@ -83,11 +84,12 @@ func defaultFDSClientConfiguration() *ClientConfiguration {
 	config.EnableCDNForDownload = false
 	config.EnableMd5Calculate = false
 	config.Timeout = 50
-	config.HTTPTimeout.ConnectTimeout = time.Second * 30   // 30s
-	config.HTTPTimeout.ReadWriteTimeout = time.Second * 60 // 60s
-	config.HTTPTimeout.HeaderTimeout = time.Second * 60    // 60s
+	config.HTTPTimeout.ConnectTimeout = time.Second * 50   // 50s
+	config.HTTPTimeout.ReadWriteTimeout = time.Second * 50 // 50s
+	config.HTTPTimeout.HeaderTimeout = time.Second * 50    // 50s
 	config.HTTPTimeout.LongTimeout = time.Second * 300     // 300s
-	config.HTTPTimeout.IdleConnTimeout = time.Second * 50  // 50s
+	config.HTTPTimeout.IdleConnTimeout = time.Second * 90  // 50s
+	config.HTTPTimeout.KeepAliveTimeout = time.Second * 30
 	config.MaxConnection = 20
 	config.BatchDeleteSize = 1000
 	config.RetryCount = 3
