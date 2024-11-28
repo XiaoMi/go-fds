@@ -54,7 +54,7 @@ func New(accessID, accessSecret string, conf *ClientConfiguration) *Client {
 		ForceAttemptHTTP2:     true,
 		MaxIdleConns:          100,
 		IdleConnTimeout:       conf.HTTPTimeout.IdleConnTimeout,
-		TLSHandshakeTimeout:   conf.HTTPTimeout.ReadWriteTimeout,
+		TLSHandshakeTimeout:   conf.HTTPTimeout.TLSHandshakeTimeout,
 		ExpectContinueTimeout: 1 * time.Second,
 	}
 	client.httpClient = &http.Client{

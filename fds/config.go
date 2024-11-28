@@ -8,12 +8,13 @@ import (
 
 // HTTPTimeout defines HTTP timeout.
 type HTTPTimeout struct {
-	ConnectTimeout   time.Duration
-	ReadWriteTimeout time.Duration
-	HeaderTimeout    time.Duration
-	LongTimeout      time.Duration
-	IdleConnTimeout  time.Duration
-	KeepAliveTimeout time.Duration
+	ConnectTimeout      time.Duration
+	ReadWriteTimeout    time.Duration
+	HeaderTimeout       time.Duration
+	LongTimeout         time.Duration
+	IdleConnTimeout     time.Duration
+	TLSHandshakeTimeout time.Duration
+	KeepAliveTimeout    time.Duration
 }
 
 // ClientConfiguration required by FDSClient initialization
@@ -89,6 +90,7 @@ func defaultFDSClientConfiguration() *ClientConfiguration {
 	config.HTTPTimeout.HeaderTimeout = time.Second * 50    // 50s
 	config.HTTPTimeout.LongTimeout = time.Second * 300     // 300s
 	config.HTTPTimeout.IdleConnTimeout = time.Second * 90  // 50s
+	config.HTTPTimeout.TLSHandshakeTimeout = time.Second * 50
 	config.HTTPTimeout.KeepAliveTimeout = time.Second * 30
 	config.MaxConnection = 20
 	config.BatchDeleteSize = 1000
