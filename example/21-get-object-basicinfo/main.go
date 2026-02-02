@@ -16,7 +16,7 @@ func main() {
 
 	fdsClient := fds.New(os.Getenv("GO_FDS_TEST_ACCESS_KEY_ID"), os.Getenv("GO_FDS_TEST_ACCESS_KEY_SECRET"), fdsConf)
 
-	objectBasicInfo, err := fdsClient.GetObjectBasicInfo("first-bucket-test-4", "test.txt")
+	objectBasicInfo, err := fdsClient.GetObjectBasicInfo("bucketname", "test.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
