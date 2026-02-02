@@ -382,6 +382,26 @@ func (metadata *ObjectMetadata) serialize() ([]byte, error) {
 	return result, nil
 }
 
+func (metadata *ObjectMetadata) UnmarshalJSON(data []byte) error {
+	var aux struct {
+		RawMeta struct {
+			Entry []struct {
+				Key   string `json:"key"`
+				Value string `json:"value"`
+			} `json:"entry"`
+		} `json:"rawMeta"`
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	metadata.metadata = make(map[string]string, len(aux.RawMeta.Entry))
+	for _, kv := range aux.RawMeta.Entry {
+		metadata.metadata[kv.Key] = kv.Value
+	}
+	return nil
+}
+
 func parseObjectMetadataFromHeader(header http.Header) *ObjectMetadata {
 	objectMetadata := NewObjectMetadata()
 	for k := range header {
@@ -874,4 +894,40 @@ func (client *Client) SetObjectPublicWithContext(ctx context.Context, bucketName
 	}
 
 	return client.SetObjectACLWithContext(ctx, aclRequest)
+}
+
+type ObjectBasicInfo struct {
+	AllowOutsideAccess *bool           `json:"allowOutsideAccess,omitempty"`
+	Size               int64          `json:"size"`
+	UploadTime         int64          `json:"uploadTime"`
+	StorageClassType   StorageClass   `json:"storageClass"`
+	Metadata           ObjectMetadata `json:"metadataBean"`
+}
+
+type getObjectBasicInfoOption struct {
+	BasicInfo string `param:"basicInfo" header:"-"`
+}
+
+// GetObjectBasicInfo
+func (client *Client) GetObjectBasicInfo(bucketName, objectName string) (*ObjectBasicInfo, error) {
+	return client.GetObjectBasicInfoWithContext(context.Background(), bucketName, objectName)
+}
+
+func (client *Client) GetObjectBasicInfoWithContext(ctx context.Context, bucketName, objectName string) (*ObjectBasicInfo, error) {
+	result := &ObjectBasicInfo{}
+	req := &clientRequest{
+		BucketName:         bucketName,
+		ObjectName:         objectName,
+		Method:             HTTPGet,
+		QueryHeaderOptions: getObjectBasicInfoOption{},
+		Result:             result,
+	}
+
+	resp, err := client.do(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	return result, nil
 }
