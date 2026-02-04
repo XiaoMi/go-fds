@@ -90,10 +90,12 @@ func (client *Client) DeleteBucketWithContext(ctx context.Context, bucketName st
 // GetBucketInfoResponse is result of GetBucketInfo
 type GetBucketInfoResponse struct {
 	AllowOutsideAccess bool   `json:"allowOutsideAccess"`
+	EnableSSE          bool	  `json:"enableSSE"`
 	CreationTime       int64  `json:"creationTime"`
 	BucketName         string `json:"name"`
 	ObjectNum          int64  `json:"numObjects"`
 	UsedSpace          int64  `json:"usedSpace"`
+	StorageClassType   StorageClass `json:"storageClass"`
 }
 
 // GetBucketInfo get information of a bucket
